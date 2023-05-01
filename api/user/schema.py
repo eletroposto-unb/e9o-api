@@ -1,4 +1,3 @@
-from typing import Union
 from pydantic import BaseModel
 
 class UserBase(BaseModel):
@@ -8,3 +7,9 @@ class UserBase(BaseModel):
 
 class UserRequest(UserBase):
     '''...'''
+
+class UserResponse(UserBase):
+    '''Classe para definir o Usuário devolvido pela API'''
+    id: int
+    class Config:
+        orm_mode = True
