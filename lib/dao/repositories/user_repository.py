@@ -10,20 +10,26 @@ class UserRepository:
     
     @staticmethod
     def find_by_key(cpf, database: Session = get_database()) -> User:
-        '''Função para fazer uma query com base no cpf (por enquanto desconsiderando o firebase_uid)'''
+        '''Função para fazer uma query com base no cpf'''
         return database.query(User).filter(User.cpf == cpf).first()
     
     @staticmethod
     def create(firebase_uid, user: User, database: Session = get_database()) -> User:
         '''Função para criar um usuario'''
-        user.firebase_uid = firebase_uid
-        database.add(user)
-        database.commit()
+        try:
+            user.firebase_uid = firebase_uid
+            database.add(user)
+            database.commit()
+        except:
+            database.rollback()
         return user
 
     @staticmethod
     def update(user: User, database: Session = get_database()) -> User:
-        '''Função para salvar um objeto aluna na DB'''
-        database.merge(user)
-        database.commit()
+        '''Função para atualizar um objeto na DB'''
+        try:
+            database.merge(user)
+            database.commit()
+        except:
+            database.rollback()
         return user

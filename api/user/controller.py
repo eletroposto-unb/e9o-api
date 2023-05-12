@@ -53,3 +53,17 @@ def update(cpf, request: UserRequest):
         )
     user = UserRepository.update(User(**request.dict()))
     return UserResponse.from_orm(user)
+
+@users.put("/alterstatus/{cpf}",
+    status_code = status.HTTP_200_OK,
+    response_model=UserResponse
+)
+def alter(cpf):
+    '''Alterna status do usuario. Dessa forma ao invés de deletar usuário, apenas desativa'''
+    user = UserRepository.find_by_key(cpf)
+    if user.status == 'inactive':
+        user.status = 'active'
+    else:
+        user.status = 'inactive'
+    user = UserRepository.update(user)
+    return UserResponse.from_orm(user)
