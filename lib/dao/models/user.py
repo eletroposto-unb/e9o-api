@@ -5,13 +5,13 @@ from lib.dao.database import Base
 class User(Base):
     __tablename__ = 'users'
     
-    id: int = Column(Integer, Sequence('users_seq'), primary_key=True, index=True)
+    firebase_uid: str = Column(String(128))
     name: str = Column(String(100), nullable=False)
     surname: str = Column(String(100), nullable=False)
     email: str = Column(String(100), nullable=False)
-    cpf: int = Column(BigInteger, nullable=False)
+    cpf: int = Column(BigInteger, primary_key=True, nullable=False)
     is_admin: bool = Column(Boolean, default=False)
     telefone: int = Column(BigInteger, nullable=False)
-    status: int = Column(Integer, nullable=False)
+    status: str = Column(String(10), nullable=False)
 
     

@@ -10,11 +10,11 @@ users = APIRouter(
     responses = {404: {"description": "Not found"}},
 )
 
-@users.post("/",
+@users.post("/register/{firebase_uid}",
     status_code = status.HTTP_201_CREATED,
     response_model=UserResponse
 )
-def create(request: UserRequest):
+def create(firebase_uid,request: UserRequest):
     '''Cria e salva um usuário'''
-    user = UserRepository.create(User(**request.dict()))
+    user = UserRepository.create(firebase_uid, User(**request.dict()))
     return user

@@ -9,8 +9,14 @@ class UserRepository:
         return database.query(User).all()
     
     @staticmethod
-    def create(user: User, database: Session = get_database()) -> User:
+    def find_by_id(id: str, database: Session = get_database()) -> User:
+        '''Função para fazer uma query com base no id (por enquanto desconsiderando o firebase_uid)'''
+        return database.query(User).filter(User.firebase_uid == id).first()
+    
+    @staticmethod
+    def create(firebase_uid, user: User, database: Session = get_database()) -> User:
         '''Função para criar um usuario'''
+        user.firebase_uid = firebase_uid
         database.add(user)
         database.commit()
         return user
