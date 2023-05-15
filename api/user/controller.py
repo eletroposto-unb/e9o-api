@@ -19,7 +19,7 @@ def create(firebase_uid,request: UserRequest):
     user = UserRepository.create(firebase_uid, User(**request.dict()))
     return user
 
-@users.get("/find/{cpf}",
+@users.get("/{cpf}",
     status_code = status.HTTP_200_OK,
     response_model=UserResponse
 )
@@ -32,7 +32,7 @@ def find_one(cpf):
         )
     return UserResponse.from_orm(user)
 
-@users.get("/findall",
+@users.get("/",
     status_code=status.HTTP_200_OK,
     response_model=list[UserResponse]
 )
@@ -40,7 +40,7 @@ def find_all():
     users = UserRepository.find_all()
     return [UserResponse.from_orm(user) for user in users]
 
-@users.put("/update/{cpf}",
+@users.put("/{cpf}",
     status_code = status.HTTP_200_OK,
     response_model=UserResponse
 )
