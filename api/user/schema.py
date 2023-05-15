@@ -11,9 +11,9 @@ class UserBase(BaseModel):
     name: str
     surname: str
     email: str
-    cpf: int
+    cpf: str
     is_admin: bool
-    telefone: int
+    telefone: str
     status: statusEnum = statusEnum.ACTIVE
 
 

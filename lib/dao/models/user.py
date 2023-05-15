@@ -9,9 +9,9 @@ class User(Base):
     name: str = Column(String(100), nullable=False)
     surname: str = Column(String(100), nullable=False)
     email: str = Column(String(100), nullable=False)
-    cpf: int = Column(BigInteger, primary_key=True, nullable=False, index=True)
+    cpf: str = Column(String(100), primary_key=True, nullable=False, index=True)
     is_admin: bool = Column(Boolean, default=False)
-    telefone: int = Column(BigInteger, nullable=False)
+    telefone: int = Column(String(100), nullable=False)
     status: str = Column(String(10), nullable=False)
 
     
