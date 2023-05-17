@@ -1,10 +1,11 @@
+from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.user import User
 from lib.dao.database import get_database
 
 class UserRepository:
     @staticmethod
-    def find_all(database: Session = get_database()) -> list[User]:
+    def find_all(database: Session = get_database()) -> List[User]:
         '''Função para fazer uma query de todas as User da DB'''
         return database.query(User).all()
     
@@ -30,11 +31,24 @@ class UserRepository:
         return user
 
     @staticmethod
-    def update(user: User, database: Session = get_database()) -> User:
+    def update(firebase_uid: str ,user: User, database: Session = get_database()) -> User:
         '''Função para atualizar um objeto na DB'''
         try:
-            database.merge(user)
-            database.commit()
+            if user.cpf:
+                user.firebase_uid = firebase_uid
+                database.merge(user)
+                database.commit()
+        except:
+            database.rollback()
+        return user
+    
+    @staticmethod
+    def update_status(user: User, database: Session = get_database()) -> User:
+        '''Função para atualizar um objeto na DB'''
+        try:
+            if user.cpf:
+                database.merge(user)
+                database.commit()
         except:
             database.rollback()
         return user
