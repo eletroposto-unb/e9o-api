@@ -12,18 +12,17 @@ class CarRepository:
 
     @staticmethod
     def find_cars_by_user(cpf, database: Session = get_database()) -> List[Car]:
-        '''Função para fazer uma query com base no idCarro'''
+        '''Função para fazer uma query com base no id'''
         return database.query(Car).filter(Car.cpf == cpf).all()
 
     @staticmethod
-    def find_by_key(idCarro, database: Session = get_database()) -> Car:
-        '''Função para fazer uma query com base no idCarro'''
-        return database.query(Car).filter(Car.idCarro == idCarro).first()
+    def find_by_key(id, database: Session = get_database()) -> Car:
+        '''Função para fazer uma query com base no id'''
+        return database.query(Car).filter(Car.id == id).first()
     
     @staticmethod
     def create(car: Car, database: Session = get_database()) -> Car:
         '''Função para criar um Carro'''
-        print(car.placa)
         try:
             database.add(car)
             database.commit()

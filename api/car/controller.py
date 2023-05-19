@@ -25,13 +25,13 @@ def create(request: CarRequest):
     return CarResponse.from_orm(car)
 
 
-@cars.get("/{idCarro}",
+@cars.get("/{id}",
     status_code = status.HTTP_200_OK,
     response_model=CarResponse
 )
-def find_one(idCarro):
-    '''Procura um carro pelo idCarro'''
-    car = CarRepository.find_by_key(idCarro)
+def find_one(id):
+    '''Procura um carro pelo id'''
+    car = CarRepository.find_by_key(id)
     if not car:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Carro não existe / não encontrado"
@@ -62,12 +62,12 @@ def find_all():
     return [CarResponse.from_orm(car) for car in cars]
 
 
-@cars.put("/{idCarro}",
+@cars.put("/{id}",
     status_code = status.HTTP_200_OK,
     response_model=CarResponse
 )
-def update(idCarro, request: CarRequest):
+def update(id, request: CarRequest):
     '''atualiza os dados do carro'''
-    car = CarRepository.find_by_key(idCarro)
+    car = CarRepository.find_by_key(id)
     car = CarRepository.update(car(**request.dict()))
     return CarResponse.from_orm(car)
