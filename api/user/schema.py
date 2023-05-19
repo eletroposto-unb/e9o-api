@@ -22,5 +22,6 @@ class UserRequest(UserBase):
 
 class UserResponse(UserBase):
     '''Classe para definir o Usuário devolvido pela API'''
+    firebase_uid: str
     class Config:
         orm_mode = True

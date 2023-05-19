@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, status
 
 from api.user.schema import UserRequest, UserResponse
@@ -19,11 +20,11 @@ def create(firebase_uid,request: UserRequest):
     user = UserRepository.create(firebase_uid, User(**request.dict()))
     return user
 
-@users.get("/{cpf}",
+@users.get("/user/cpf/{cpf}",
     status_code = status.HTTP_200_OK,
     response_model=UserResponse
 )
-def find_one(cpf):
+def find_one_by_cpf(cpf):
     '''Procura um usuário pelo cpf'''
     user = UserRepository.find_by_key(cpf)
     if not user:
@@ -32,9 +33,22 @@ def find_one(cpf):
         )
     return UserResponse.from_orm(user)
 
+@users.get("/user/uid/{firebase_uid}",
+    status_code = status.HTTP_200_OK,
+    response_model=UserResponse
+)
+def find_one_by_uid(firebase_uid):
+    '''Procura um usuário pelo firebase_uid'''
+    user = UserRepository.find_by_uid(firebase_uid)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
+        )
+    return UserResponse.from_orm(user)
+
 @users.get("/",
     status_code=status.HTTP_200_OK,
-    response_model=list[UserResponse]
+    response_model=List[UserResponse]
 )
 def find_all():
     users = UserRepository.find_all()
@@ -44,15 +58,16 @@ def find_all():
     status_code = status.HTTP_200_OK,
     response_model=UserResponse
 )
-def update(cpf, request: UserRequest):
+def update(cpf: str, request: UserRequest):
     '''atualiza os dados do usuario'''
     user = UserRepository.find_by_key(cpf)
     if user.status == 'inactive':
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Usuario inativo"
         )
-    user = UserRepository.update(User(**request.dict()))
-    return UserResponse.from_orm(user)
+    else:
+        updated_user = UserRepository.update(user.firebase_uid, User(**request.dict()))
+    return UserResponse.from_orm(updated_user)
 
 @users.put("/alterstatus/{cpf}",
     status_code = status.HTTP_200_OK,
@@ -65,5 +80,5 @@ def alter(cpf):
         user.status = 'active'
     else:
         user.status = 'inactive'
-    user = UserRepository.update(user)
+    user = UserRepository.update_status(user)
     return UserResponse.from_orm(user)
