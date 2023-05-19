@@ -11,7 +11,7 @@ class User(Base):
     email: str = Column(String(100), nullable=False)
     cpf: str = Column(String(100), primary_key=True, nullable=False, index=True)
     is_admin: bool = Column(Boolean, default=False)
-    telefone: int = Column(String(100), nullable=False)
+    telefone: str = Column(String(100), nullable=False)
     status: str = Column(String(10), nullable=False)
 
     
