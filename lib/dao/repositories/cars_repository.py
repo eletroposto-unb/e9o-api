@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.car import Car
 from lib.dao.models.user import User
@@ -5,12 +6,12 @@ from lib.dao.database import get_database
 
 class CarRepository:
     @staticmethod
-    def find_all(database: Session = get_database()) -> list[Car]:
+    def find_all(database: Session = get_database()) -> List[Car]:
         '''Função para fazer uma query de todos os Carros do DB'''
         return database.query(Car).all()
 
     @staticmethod
-    def find_cars_by_user(cpf, database: Session = get_database()) -> list[Car]:
+    def find_cars_by_user(cpf, database: Session = get_database()) -> List[Car]:
         '''Função para fazer uma query com base no idCarro'''
         return database.query(Car).filter(Car.cpf == cpf).all()
 
@@ -22,11 +23,13 @@ class CarRepository:
     @staticmethod
     def create(car: Car, database: Session = get_database()) -> Car:
         '''Função para criar um Carro'''
+        print(car.placa)
         try:
             database.add(car)
             database.commit()
         except:
             database.rollback()
+        print('esse e o carro')
         return car
 
     @staticmethod
