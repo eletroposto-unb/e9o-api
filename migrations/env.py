@@ -3,32 +3,32 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from alembic import context
-
+from lib.config.env import settings
+from lib.dao.database import Base
 from lib.dao.models import user
 
-from lib.config.env import settings
-
 SQLALCHEMY_DATABASE_URL = settings.db_connect_url
+
+from alembic import context
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
-config.set_section_option(
-    config.config_ini_section, "sqlalchemy.url", SQLALCHEMY_DATABASE_URL
-)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+config.set_section_option(
+    config.config_ini_section, "sqlalchemy.url", SQLALCHEMY_DATABASE_URL
+)
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = user.Base.metadata
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
