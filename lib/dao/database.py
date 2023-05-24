@@ -5,7 +5,7 @@ from lib.config.env import settings
 
 SQLALCHEMY_DATABASE_URL = settings.db_connect_url
 
-print()
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
     pool_size=200,
@@ -18,7 +18,7 @@ Base = declarative_base()
 def get_database(expire_on_commit: bool = True):
     db = SessionLocal(expire_on_commit=expire_on_commit)
     try:
-        return db
+        yield db
     finally:
         db.close()
 
