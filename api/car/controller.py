@@ -39,9 +39,9 @@ def find_one(id):
     return CarResponse.from_orm(car)
 
 
-@cars.get("/{cpf}",
+@cars.get("/user/{cpf}",
     status_code = status.HTTP_200_OK,
-    response_model=CarResponse
+    response_model=List[CarResponse]
 )
 def find_by_user(cpf):
     '''Procura todos os carros de um User pelo cpf'''
@@ -68,6 +68,7 @@ def find_all():
 )
 def update(id, request: CarRequest):
     '''atualiza os dados do carro'''
-    car = CarRepository.find_by_key(id)
-    car = CarRepository.update(car(**request.dict()))
+    car = Car(**request.dict())
+    car.id = id
+    car = CarRepository.update(car)
     return CarResponse.from_orm(car)
