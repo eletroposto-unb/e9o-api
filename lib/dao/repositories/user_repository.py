@@ -1,7 +1,6 @@
 from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.user import User
-from lib.dao.database import get_database
 
 class UserRepository:
     @staticmethod
