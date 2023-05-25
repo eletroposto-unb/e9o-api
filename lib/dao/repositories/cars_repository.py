@@ -11,8 +11,8 @@ class CarRepository:
         return database.query(Car).all()
 
     @staticmethod
-    def find_cars_by_user(cpf, database: Session = get_database()) -> List[Car]:
-        '''Função para fazer uma query com base no id'''
+    def find_cars_by_user(cpf: str, database: Session = get_database()) -> List[Car]:
+        '''Função para fazer uma query com base no cpf do user'''
         return database.query(Car).filter(Car.cpf == cpf).all()
 
     @staticmethod
