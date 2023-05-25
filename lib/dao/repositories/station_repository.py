@@ -32,6 +32,11 @@ class StationRepository:
         return database.query(Station).all()
     
     @staticmethod
+    def find_station_by_id(idStation, database: Session) -> Address:
+        '''Função para fazer uma query de um endereco da DB'''
+        return database.query(Station).filter(idStation==Station.idPosto).first()
+    
+    @staticmethod
     def find_address(idEndereco, database: Session) -> Address:
         '''Função para fazer uma query de um endereco da DB'''
         return database.query(Address).filter(idEndereco==Address.idEndereco).first()

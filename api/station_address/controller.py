@@ -46,7 +46,18 @@ def find_all_stations(
     stations = StationRepository.find_all(database=database)
     return [StationResponse.from_orm(station) for station in stations]
 
-@stations.get("/station/{idEndereco}",
+@stations.get("/station/{idStation}",
+              status_code = status.HTTP_200_OK,
+              response_model=StationResponse
+              )
+def find_station_by_id(
+        idStation,
+        database: Session = Depends(get_database),
+    ):
+    station = StationRepository.find_station_by_id(idStation=idStation,database=database)
+    return StationResponse.from_orm(station)
+
+@stations.get("/station/address/{idEndereco}",
               status_code = status.HTTP_200_OK,
               response_model=AddressResponse
               )
