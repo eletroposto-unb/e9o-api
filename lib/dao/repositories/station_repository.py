@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
@@ -24,3 +25,13 @@ class StationRepository:
         except:
             database.rollback()
         return station
+    
+    @staticmethod
+    def find_all(database: Session) -> List[Station]:
+        '''Função para fazer uma query de todas as Estacoes da DB'''
+        return database.query(Station).all()
+    
+    @staticmethod
+    def find_address(idEndereco, database: Session) -> Address:
+        '''Função para fazer uma query de um endereco da DB'''
+        return database.query(Address).filter(idEndereco==Address.idEndereco).first()

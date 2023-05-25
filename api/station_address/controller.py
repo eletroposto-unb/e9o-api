@@ -1,6 +1,7 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from api.station_address.schema import StationRequest, StationResponse
+from api.station_address.schema import AddressResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
 from lib.dao.repositories.station_repository import StationRepository
@@ -33,6 +34,25 @@ def create(
               & {'cep', 'latitude', 'longitude', 'estado',
                  'cidade', 'endereco', 'complemento'}}
     res = StationRepository.create(Station(**station), Address(**address), database=database)
-    # print(station.id)
-    return res
-    
+    return StationResponse.from_orm(res)
+
+@stations.get("/",
+            status_code = status.HTTP_200_OK,
+            response_model=List[StationResponse]
+            )
+def find_all_stations(
+        database: Session = Depends(get_database),
+    ):
+    stations = StationRepository.find_all(database=database)
+    return [StationResponse.from_orm(station) for station in stations]
+
+@stations.get("/station/{idEndereco}",
+              status_code = status.HTTP_200_OK,
+              response_model=AddressResponse
+              )
+def find_stations_address(
+        idEndereco,
+        database: Session = Depends(get_database),
+    ):
+    address = StationRepository.find_address(idEndereco=idEndereco,database=database)
+    return AddressResponse.from_orm(address)

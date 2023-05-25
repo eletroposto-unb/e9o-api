@@ -11,6 +11,6 @@ class Station(Base):
     precoKwh: float = Column(Float)
     horarioFuncionamento: str = Column(String(100), nullable=False)
     tipoTomada: str = Column(String(100), nullable=False)
-    potencia: int = Column(Integer, nullable=False)
+    potencia: float = Column(Float, nullable=False)
 
     idEndereco: int = Column(Integer, ForeignKey(Address.idEndereco), nullable=False)

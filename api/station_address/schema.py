@@ -13,10 +13,10 @@ class StationBase(BaseModel):
     precoKwh: float 
     horarioFuncionamento: str
     tipoTomada: str
-    potencia: int
+    potencia: float
 
 class AddressBase(BaseModel):
-    cep: int
+    cep: str
     latitude: float
     longitude: float
     estado: str
@@ -29,8 +29,14 @@ class StationRequest(StationBase, AddressBase):
     '''Classe que define o que deve ser incluido dentro do request alem do Base'''
 
 class StationResponse(StationBase):
-    '''Classe para definir estacao e endereco devolvido pela API'''
+    '''Classe para definir posto devolvido pela API'''
     idPosto: int 
+    idEndereco: int
+    class Config:
+        orm_mode = True
+
+class AddressResponse(AddressBase):
+    '''Classe para definir endereco devolvido pela API'''
     idEndereco: int
     class Config:
         orm_mode = True
