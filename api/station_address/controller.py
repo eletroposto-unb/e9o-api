@@ -33,6 +33,7 @@ def create(
     address = {key: req[key] for key in req.keys()
               & {'cep', 'latitude', 'longitude', 'estado',
                  'cidade', 'endereco', 'complemento'}}
+    
     res = StationRepository.create(Station(**station), Address(**address), database=database)
     return StationResponse.from_orm(res)
 
@@ -40,9 +41,7 @@ def create(
             status_code = status.HTTP_200_OK,
             response_model=List[StationResponse]
             )
-def find_all_stations(
-        database: Session = Depends(get_database),
-    ):
+def find_all_stations(database: Session = Depends(get_database)):
     stations = StationRepository.find_all(database=database)
     return [StationResponse.from_orm(station) for station in stations]
 
@@ -50,10 +49,7 @@ def find_all_stations(
               status_code = status.HTTP_200_OK,
               response_model=StationResponse
               )
-def find_station_by_id(
-        idStation,
-        database: Session = Depends(get_database),
-    ):
+def find_station_by_id(idStation, database: Session = Depends(get_database)):
     station = StationRepository.find_station_by_id(idStation=idStation,database=database)
     return StationResponse.from_orm(station)
 
@@ -61,10 +57,7 @@ def find_station_by_id(
               status_code = status.HTTP_200_OK,
               response_model=AddressResponse
               )
-def find_stations_address(
-        idEndereco,
-        database: Session = Depends(get_database),
-    ):
+def find_stations_address(idEndereco, database: Session = Depends(get_database)):
     address = StationRepository.find_address(idEndereco=idEndereco,database=database)
     return AddressResponse.from_orm(address)
 
@@ -72,11 +65,7 @@ def find_stations_address(
               status_code = status.HTTP_200_OK,
               response_model=StationResponse
               )
-def update_station(
-    idStation,
-    request: StationRequest,
-    database: Session = Depends(get_database)
-    ):
+def update_station(idStation, request: StationRequest, database: Session = Depends(get_database)):
     '''atualiza os dados do posto'''
     station = StationRepository.find_station_by_id(idStation=idStation,database=database)
 
@@ -97,3 +86,15 @@ def update_station(
 
         updated_station = StationRepository.update_station(idStation,Station(**station), Address(**address), database=database)
         return StationResponse.from_orm(updated_station)
+    
+@stations.delete('/station/{idStation}',
+                    status_code = status.HTTP_200_OK,
+                    response_model=StationResponse
+                    )
+def delete_by_id(idStation: int, database: Session = Depends(get_database)):
+    if not StationRepository.find_station_by_id(idStation, database):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Posto não encontrado"
+        )
+    station = StationRepository.delete_by_id(idStation, database)
+    return StationResponse.from_orm(station)

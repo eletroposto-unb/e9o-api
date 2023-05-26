@@ -33,7 +33,7 @@ class StationRepository:
     
     @staticmethod
     def find_station_by_id(idStation, database: Session) -> Address:
-        '''Função para fazer uma query de um endereco da DB'''
+        '''Função para fazer uma query de um posto pelo id da DB'''
         return database.query(Station).filter(idStation==Station.idPosto).first()
     
     @staticmethod
@@ -63,3 +63,11 @@ class StationRepository:
             database.rollback()
         print(station.idPosto)
         return station
+    
+    @staticmethod
+    def delete_by_id(idStation: int, database: Session,) -> Station:
+        station = database.query(Station).filter(Station.idPosto == idStation).first()
+        if station is not None:
+            database.delete(station)
+            database.commit()
+            return station
