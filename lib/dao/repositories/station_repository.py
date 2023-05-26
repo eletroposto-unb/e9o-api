@@ -40,3 +40,26 @@ class StationRepository:
     def find_address(idEndereco, database: Session) -> Address:
         '''Função para fazer uma query de um endereco da DB'''
         return database.query(Address).filter(idEndereco==Address.idEndereco).first()
+    
+    @staticmethod
+    def update_station(idPosto, station: Station, address: Address, database: Session) -> Station:
+        exists_address = database.query(Address).filter_by(cep=address.cep).first() is not None
+
+        if(exists_address == False):
+            database.add(address)
+            database.commit()
+            database.refresh(address)
+
+        address = database.query(Address).filter_by(cep=address.cep).first()
+        idEndereco = address.idEndereco
+
+        try:
+            station.idEndereco = idEndereco
+            station.idPosto = idPosto
+            database.merge(station)
+            database.commit()
+            database.refresh(station)
+        except:
+            database.rollback()
+        print(station.idPosto)
+        return station

@@ -67,3 +67,33 @@ def find_stations_address(
     ):
     address = StationRepository.find_address(idEndereco=idEndereco,database=database)
     return AddressResponse.from_orm(address)
+
+@stations.put('/station/{idStation}',
+              status_code = status.HTTP_200_OK,
+              response_model=StationResponse
+              )
+def update_station(
+    idStation,
+    request: StationRequest,
+    database: Session = Depends(get_database)
+    ):
+    '''atualiza os dados do posto'''
+    station = StationRepository.find_station_by_id(idStation=idStation,database=database)
+
+    if(not station):
+       raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Posto não existe"
+        )
+    else:
+        req = request.dict()
+
+        station = {key: req[key] for key in req.keys()
+                & {'nome', 'statusFuncionamento', 'precoKwh',
+                'horarioFuncionamento', 'tipoTomada','potencia'}}
+    
+        address = {key: req[key] for key in req.keys()
+                & {'cep', 'latitude', 'longitude', 'estado',
+                 'cidade', 'endereco', 'complemento'}}
+
+        updated_station = StationRepository.update_station(idStation,Station(**station), Address(**address), database=database)
+        return StationResponse.from_orm(updated_station)
