@@ -36,3 +36,6 @@ archive.zip
 
 # Envioronment files
 .env
+
+# alembic
+/migrations/versions/*
