@@ -34,8 +34,7 @@ def create(
                  'cidade', 'endereco', 'numero', 'complemento'}}
     
     res = StationRepository.create(Station(**station), Address(**address), database=database)
-
-    # print(StationObjectResponse.from_orm(res))
+    # print(res['address'].cep) # BUG bizarro sem o print ele não pega o address
 
     return res
 

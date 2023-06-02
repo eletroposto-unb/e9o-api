@@ -7,22 +7,20 @@ class StationRepository:
     @staticmethod
     def create(station: Station, address: Address, database: Session) -> Station:
         '''Função para criar um posto'''
-
-        database.add(address)
-        database.commit()
-        database.refresh(address)
-
         try:
             station.idEndereco = address.idEndereco
+            database.add(address)
             database.add(station)
+            # database.commit()
             database.commit()
+            database.refresh(address)
             database.refresh(station)
         except:
             database.rollback()
 
         res = {
             'station': station,
-            'address': address
+            'address': address,
         }
         return res
     
@@ -61,13 +59,13 @@ class StationRepository:
     @staticmethod
     def update_station(old_station: Station, station: Station, address: Address, database: Session) -> object:
         try:
-            station.idEndereco = old_station.idEndereco
-            station.idPosto = old_station.idPosto
-            database.merge(station)
+            station.idEndereco = old_station['address'].idEndereco
+            station.idPosto = old_station['station'].idPosto
             database.merge(address)
+            database.merge(station)
             database.commit()
-            database.refresh(station)
             database.refresh(address)
+            database.refresh(station)
 
         except:
             database.rollback()
