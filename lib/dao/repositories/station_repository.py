@@ -8,10 +8,10 @@ class StationRepository:
     def create(station: Station, address: Address, database: Session) -> Station:
         '''Função para criar um posto'''
         try:
-            station.idEndereco = address.idEndereco
             database.add(address)
+            database.commit()
+            station.idEndereco = address.idEndereco
             database.add(station)
-            # database.commit()
             database.commit()
             database.refresh(address)
             database.refresh(station)
