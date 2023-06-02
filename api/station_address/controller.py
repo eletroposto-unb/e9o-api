@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from api.station_address.schema import AddressResponse, StationRequest, StationResponse
+from api.station_address.schema import AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
 from lib.dao.repositories.station_repository import StationRepository
@@ -16,8 +16,7 @@ stations = APIRouter(
 )
 
 @stations.post("/register/",
-    status_code = status.HTTP_201_CREATED,
-    response_model=StationResponse
+    status_code = status.HTTP_201_CREATED
 )
 def create(
     request: StationRequest, 
@@ -27,15 +26,18 @@ def create(
     req = request.dict()
 
     station = {key: req[key] for key in req.keys()
-              & {'nome', 'statusFuncionamento', 'precoKwh',
+              & {'nome', 'descricao', 'cabo','statusFuncionamento', 'precoKwh',
                 'horarioFuncionamento', 'tipoTomada','potencia'}}
     
     address = {key: req[key] for key in req.keys()
-              & {'cep', 'latitude', 'longitude', 'estado',
-                 'cidade', 'endereco', 'complemento'}}
+              & {'cep', 'comodidade', 'latitude', 'longitude', 'estado',
+                 'cidade', 'endereco', 'numero', 'complemento'}}
     
     res = StationRepository.create(Station(**station), Address(**address), database=database)
-    return StationResponse.from_orm(res)
+
+    # print(StationObjectResponse.from_orm(res))
+
+    return res
 
 @stations.get("/",
             status_code = status.HTTP_200_OK,
@@ -77,13 +79,13 @@ def update_station(idStation, request: StationRequest, database: Session = Depen
         req = request.dict()
 
         station = {key: req[key] for key in req.keys()
-                & {'nome', 'statusFuncionamento', 'precoKwh',
+              & {'nome', 'descricao', 'cabo','statusFuncionamento', 'precoKwh',
                 'horarioFuncionamento', 'tipoTomada','potencia'}}
     
         address = {key: req[key] for key in req.keys()
-                & {'cep', 'latitude', 'longitude', 'estado',
-                 'cidade', 'endereco', 'complemento'}}
-
+              & {'cep', 'comodidade', 'latitude', 'longitude', 'estado',
+                 'cidade', 'endereco', 'numero', 'complemento'}}
+                 
         updated_station = StationRepository.update_station(idStation,Station(**station), Address(**address), database=database)
         return StationResponse.from_orm(updated_station)
     
