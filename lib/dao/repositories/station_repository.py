@@ -60,6 +60,7 @@ class StationRepository:
     def update_station(old_station: Station, station: Station, address: Address, database: Session) -> object:
         try:
             station.idEndereco = old_station['address'].idEndereco
+            address.idEndereco = old_station['address'].idEndereco
             station.idPosto = old_station['station'].idPosto
             database.merge(address)
             database.merge(station)
@@ -79,9 +80,16 @@ class StationRepository:
         # return station
     
     @staticmethod
-    def delete_by_id(idStation: int, database: Session,) -> Station:
-        station = database.query(Station).filter(Station.idPosto == idStation).first()
-        if station is not None:
+    def delete_by_id(idPosto: int, database: Session) -> object:
+        station = database.query(Station).filter(Station.idPosto == idPosto).first()
+        address = database.query(Address).filter(Address.idEndereco == station.idEndereco).first()
+        if station and address is not None:
             database.delete(station)
             database.commit()
-            return station
+            database.delete(address)
+            database.commit()
+            res = {
+                'station': station,
+                'address': address
+            }
+            return res

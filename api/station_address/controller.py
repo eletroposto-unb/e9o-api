@@ -61,12 +61,12 @@ def find_stations_address(idEndereco, database: Session = Depends(get_database))
     address = StationRepository.find_address(idEndereco=idEndereco,database=database)
     return AddressResponse.from_orm(address)
 
-@stations.put('/station/{idStation}',
+@stations.put('/station/{idPosto}',
               status_code = status.HTTP_200_OK,
               )
-def update_station(idStation, request: StationRequest, database: Session = Depends(get_database)):
+def update_station(idPosto, request: StationRequest, database: Session = Depends(get_database)):
     '''atualiza os dados do posto'''
-    old_station = StationRepository.find_station_by_id(idStation=idStation,database=database)
+    old_station = StationRepository.find_station_by_id(idPosto=idPosto,database=database)
 
     if(not old_station):
        raise HTTPException(
@@ -86,14 +86,13 @@ def update_station(idStation, request: StationRequest, database: Session = Depen
         res = StationRepository.update_station(old_station,Station(**new_station), Address(**new_address), database=database)
         return res
     
-@stations.delete('/station/{idStation}',
+@stations.delete('/station/{idPosto}',
                     status_code = status.HTTP_200_OK,
-                    response_model=StationResponse
                     )
-def delete_by_id(idStation: int, database: Session = Depends(get_database)):
-    if not StationRepository.find_station_by_id(idStation, database):
+def delete_by_id(idPosto: int, database: Session = Depends(get_database)):
+    if not StationRepository.find_station_by_id(idPosto, database):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Posto não encontrado"
         )
-    station = StationRepository.delete_by_id(idStation, database)
-    return StationResponse.from_orm(station)
+    res = StationRepository.delete_by_id(idPosto, database)
+    return res
