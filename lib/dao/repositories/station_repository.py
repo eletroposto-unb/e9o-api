@@ -40,9 +40,9 @@ class StationRepository:
         return res
     
     @staticmethod
-    def find_station_by_id(idStation, database: Session) -> Address:
+    def find_station_by_id(idPosto, database: Session) -> object:
         '''Função para fazer uma query de um posto pelo id da DB'''
-        station = database.query(Station).filter(idStation==Station.idPosto).first()
+        station = database.query(Station).filter(idPosto==Station.idPosto).first()
         address = database.query(Address).filter(station.idEndereco==Address.idEndereco).first()
 
         res = {
