@@ -7,15 +7,10 @@ class StationRepository:
     @staticmethod
     def create(station: Station, address: Address, database: Session) -> Station:
         '''Função para criar um posto'''
-        exists_address = database.query(Address).filter_by(cep=address.cep).first() is not None
 
         database.add(address)
         database.commit()
         database.refresh(address)
-
-        print(address)
-        # address = database.query(Address).filter_by(cep=address.cep).first()
-        # idEndereco = address.idEndereco
 
         try:
             station.idEndereco = address.idEndereco
@@ -29,20 +24,34 @@ class StationRepository:
             'station': station,
             'address': address
         }
-
-        print(res['address'].cep)
+        return res
+    
+    @staticmethod
+    def find_all(database: Session) -> List[object]:
+        '''Função para fazer uma query de todas as Estacoes da DB'''
+        stations = database.query(Station).all()
+        res = []
+        for station in stations:
+            address = database.query(Address).filter(station.idEndereco==Address.idEndereco).first()
+            aux ={
+                'station': station,
+                'address': address   
+            }
+            res.append(aux)
 
         return res
     
     @staticmethod
-    def find_all(database: Session) -> List[Station]:
-        '''Função para fazer uma query de todas as Estacoes da DB'''
-        return database.query(Station).all()
-    
-    @staticmethod
     def find_station_by_id(idStation, database: Session) -> Address:
         '''Função para fazer uma query de um posto pelo id da DB'''
-        return database.query(Station).filter(idStation==Station.idPosto).first()
+        station = database.query(Station).filter(idStation==Station.idPosto).first()
+        address = database.query(Address).filter(station.idEndereco==Address.idEndereco).first()
+
+        res = {
+                'station': station,
+                'address': address   
+            }
+        return res
     
     @staticmethod
     def find_address(idEndereco, database: Session) -> Address:
@@ -50,27 +59,26 @@ class StationRepository:
         return database.query(Address).filter(idEndereco==Address.idEndereco).first()
     
     @staticmethod
-    def update_station(idPosto, station: Station, address: Address, database: Session) -> Station:
-        exists_address = database.query(Address).filter_by(cep=address.cep).first() is not None
-
-        if(exists_address == False):
-            database.add(address)
-            database.commit()
-            database.refresh(address)
-
-        address = database.query(Address).filter_by(cep=address.cep).first()
-        idEndereco = address.idEndereco
-
+    def update_station(old_station: Station, station: Station, address: Address, database: Session) -> object:
         try:
-            station.idEndereco = idEndereco
-            station.idPosto = idPosto
+            station.idEndereco = old_station.idEndereco
+            station.idPosto = old_station.idPosto
             database.merge(station)
+            database.merge(address)
             database.commit()
             database.refresh(station)
+            database.refresh(address)
+
         except:
             database.rollback()
-        print(station.idPosto)
-        return station
+
+        res = {
+            'station': station,
+            'address': address
+        }
+        return res
+        
+        # return station
     
     @staticmethod
     def delete_by_id(idStation: int, database: Session,) -> Station:

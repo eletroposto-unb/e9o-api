@@ -41,15 +41,14 @@ def create(
 
 @stations.get("/",
             status_code = status.HTTP_200_OK,
-            response_model=List[StationResponse]
             )
 def find_all_stations(database: Session = Depends(get_database)):
     stations = StationRepository.find_all(database=database)
-    return [StationResponse.from_orm(station) for station in stations]
+    return stations
+    # return [StationResponse.from_orm(station) for station in stations]
 
 @stations.get("/station/{idStation}",
               status_code = status.HTTP_200_OK,
-              response_model=StationResponse
               )
 def find_station_by_id(idStation, database: Session = Depends(get_database)):
     station = StationRepository.find_station_by_id(idStation=idStation,database=database)
@@ -65,29 +64,28 @@ def find_stations_address(idEndereco, database: Session = Depends(get_database))
 
 @stations.put('/station/{idStation}',
               status_code = status.HTTP_200_OK,
-              response_model=StationResponse
               )
 def update_station(idStation, request: StationRequest, database: Session = Depends(get_database)):
     '''atualiza os dados do posto'''
-    station = StationRepository.find_station_by_id(idStation=idStation,database=database)
+    old_station = StationRepository.find_station_by_id(idStation=idStation,database=database)
 
-    if(not station):
+    if(not old_station):
        raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Posto não existe"
         )
     else:
         req = request.dict()
 
-        station = {key: req[key] for key in req.keys()
+        new_station = {key: req[key] for key in req.keys()
               & {'nome', 'descricao', 'cabo','statusFuncionamento', 'precoKwh',
                 'horarioFuncionamento', 'tipoTomada','potencia'}}
     
-        address = {key: req[key] for key in req.keys()
+        new_address = {key: req[key] for key in req.keys()
               & {'cep', 'comodidade', 'latitude', 'longitude', 'estado',
                  'cidade', 'endereco', 'numero', 'complemento'}}
                  
-        updated_station = StationRepository.update_station(idStation,Station(**station), Address(**address), database=database)
-        return StationResponse.from_orm(updated_station)
+        res = StationRepository.update_station(old_station,Station(**new_station), Address(**new_address), database=database)
+        return res
     
 @stations.delete('/station/{idStation}',
                     status_code = status.HTTP_200_OK,
