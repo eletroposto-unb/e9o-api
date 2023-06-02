@@ -35,7 +35,7 @@ class AddressBase(BaseModel):
 class StationRequest(StationBase, AddressBase):
     '''Classe que define o que deve ser incluido dentro do request alem do Base'''
 
-class StationResponse(StationBase, AddressBase):
+class StationResponse(StationBase):
     '''Classe para definir posto devolvido pela API'''
     idPosto: int 
     idEndereco: int
