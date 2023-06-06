@@ -34,7 +34,6 @@ def create(
                  'cidade', 'endereco', 'numero', 'complemento'}}
     
     res = StationRepository.create(Station(**station), Address(**address), database=database)
-    # print(res['address'].cep) # BUG bizarro sem o print ele não pega o address
 
     return res
 
@@ -44,13 +43,12 @@ def create(
 def find_all_stations(database: Session = Depends(get_database)):
     stations = StationRepository.find_all(database=database)
     return stations
-    # return [StationResponse.from_orm(station) for station in stations]
 
 @stations.get("/station/{idPosto}",
               status_code = status.HTTP_200_OK,
               )
 def find_station_by_id(idPosto, database: Session = Depends(get_database)):
-    res = StationRepository.find_station_by_id(idPosto==idPosto,database=database)
+    res = StationRepository.find_station_by_id(idPosto=idPosto,database=database)
     return res
 
 @stations.get("/station/address/{idEndereco}",
