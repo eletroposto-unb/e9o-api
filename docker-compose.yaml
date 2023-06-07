@@ -6,4 +6,10 @@ services:
       context: .
       dockerfile: api.Dockerfile
     ports:
-      - '8081:8080'
+      - '8080:8080'
+  messager:
+    build:
+      context: .
+      dockerfile: api.Dockerfile
+    ports:
+      - '8081:8081'
