@@ -10,6 +10,6 @@ services:
   messager:
     build:
       context: .
-      dockerfile: api.Dockerfile
+      dockerfile: messager.Dockerfile
     ports:
       - '8081:8081'
