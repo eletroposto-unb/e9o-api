@@ -7,6 +7,13 @@ from api.station_address.controller import stations
 
 from fastapi.middleware.cors import CORSMiddleware
 
+import firebase_admin
+from firebase_admin import auth
+
+from lib.config.env import settings
+
+
+
 import requests
 
 api = FastAPI()
@@ -27,23 +34,23 @@ api.include_router(users)
 api.include_router(cars)
 api.include_router(stations)
 
-endpoint = ("https://api.eletrogama.online/login")
-
 @api.middleware("http")
 async def teste(request: Request, call_next):
     print("Verificação do token")
 
-    print(request.headers)
+    if not firebase_admin._apps:
+        credential = firebase_admin.credentials.Certificate('eletroposto-e9o-firebase-adminsdk-vgpsy-1aaa035bc8.json')
+        firebase_admin.initialize_app(credential)
 
+    default_app = firebase_admin.get_app(name='[DEFAULT]')
     auth_token = request.headers.get('authorization')
     
     if (auth_token):
         bearer_token: str = auth_token.split('Bearer')[1].strip()
         headers = {"authorization": "Bearer " + bearer_token}
 
-        token_validado = auth.verify_id_token(auth_token)
-
-        print('Token',token_validado)
+        res = auth.verify_id_token(bearer_token)
+        print(res)
 
     return await call_next(request)
     # print("middleware retornar usuario fazendo request")
