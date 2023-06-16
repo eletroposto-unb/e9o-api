@@ -1,4 +1,6 @@
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 from lib.dao.database import initialize_database, get_database
 
 from api.user.controller import users
@@ -15,7 +17,7 @@ from firebase_admin import auth
 api = FastAPI()
 
 origins = [
-    "*",
+    'http://localhost:3000'
 ]
 
 api.add_middleware(
@@ -36,8 +38,32 @@ whitelist = [
         'method': 'GET'
     },
     {
-        'route': '/user/',
+        'route': '/stations/station/{idPosto}',
         'method': 'GET'
+    },
+    {
+        'route': '/stations/station/address/{idEndereco}',
+        'method': 'GET'
+    },
+    {
+        'route': '/users/',
+        'method': 'GET'
+    },
+    {
+        'route': '/cars/',
+        'method': 'GET'
+    },
+    {
+        'route': '/cars/',
+        'method': 'POST'
+    },
+    {
+        'route': '/cars/',
+        'method': 'PUT'
+    },
+    {
+        'route': '/cars/',
+        'method': 'DELETE'
     },
 ]
 
@@ -45,7 +71,7 @@ whitelist = [
 async def teste(request: Request, call_next):
     print("Verificação do token")
 
-    print(request.headers)
+    print(request.path_params)
 
     if not firebase_admin._apps:
         credential = firebase_admin.credentials.Certificate('eletroposto-e9o-firebase-adminsdk-vgpsy-d158db5099.json')
@@ -59,19 +85,22 @@ async def teste(request: Request, call_next):
         headers = {"authorization": "Bearer " + bearer_token}
 
         res = auth.verify_id_token(bearer_token)
+
         uid = res['user_id']
 
         user = UserRepository.find_by_uid(uid, database=get_database())
         if (not user):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
-            )
-        elif (user.is_admin == False):
-            if any(obj['route'] == request.url.path and obj['method'] == request.method for obj in whitelist):
-                response = await call_next(request)
-        else:
-            response = await call_next(request)
-    return response
+            json_user = jsonable_encoder(user)
+            print(json_user)
+            return JSONResponse(content=json_user, status_code=status.HTTP_404_NOT_FOUND)
+        
+        elif(user.is_admin == False):
+            if not any(request.url.path.startswith(obj['route']) and obj['method'] == request.method for obj in whitelist):
+                json_user = jsonable_encoder(user)
+                print(json_user)
+                return JSONResponse(content=json_user, status_code=status.HTTP_401_UNAUTHORIZED)
+            
+    return await call_next(request)
 
 @api.on_event("startup")
 async def startup():
