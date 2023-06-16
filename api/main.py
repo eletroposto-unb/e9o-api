@@ -1,20 +1,16 @@
-from fastapi import FastAPI, Request
-from lib.dao.database import initialize_database
+from fastapi import FastAPI, HTTPException, Request, status
+from lib.dao.database import initialize_database, get_database
 
 from api.user.controller import users
 from api.car.controller import cars
 from api.station_address.controller import stations
 
+from lib.dao.repositories.user_repository import UserRepository
+
 from fastapi.middleware.cors import CORSMiddleware
 
 import firebase_admin
 from firebase_admin import auth
-
-from lib.config.env import settings
-
-
-
-import requests
 
 api = FastAPI()
 
@@ -34,15 +30,28 @@ api.include_router(users)
 api.include_router(cars)
 api.include_router(stations)
 
+whitelist = [
+    {
+        'route': '/stations/',
+        'method': 'GET'
+    },
+    {
+        'route': '/user/',
+        'method': 'GET'
+    },
+]
+
 @api.middleware("http")
 async def teste(request: Request, call_next):
     print("Verificação do token")
 
+    print(request.headers)
+
     if not firebase_admin._apps:
-        credential = firebase_admin.credentials.Certificate('eletroposto-e9o-firebase-adminsdk-vgpsy-1aaa035bc8.json')
+        credential = firebase_admin.credentials.Certificate('eletroposto-e9o-firebase-adminsdk-vgpsy-d158db5099.json')
         firebase_admin.initialize_app(credential)
 
-    default_app = firebase_admin.get_app(name='[DEFAULT]')
+
     auth_token = request.headers.get('authorization')
     
     if (auth_token):
@@ -50,13 +59,19 @@ async def teste(request: Request, call_next):
         headers = {"authorization": "Bearer " + bearer_token}
 
         res = auth.verify_id_token(bearer_token)
-        print(res)
+        uid = res['user_id']
 
-    return await call_next(request)
-    # print("middleware retornar usuario fazendo request")
-    # print(request.auth)
-    # response = await call_next(request)
-    # return response
+        user = UserRepository.find_by_uid(uid, database=get_database())
+        if (not user):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
+            )
+        elif (user.is_admin == False):
+            if any(obj['route'] == request.url.path and obj['method'] == request.method for obj in whitelist):
+                response = await call_next(request)
+        else:
+            response = await call_next(request)
+    return response
 
 @api.on_event("startup")
 async def startup():

@@ -3,7 +3,6 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     db_connect_url: str
-    firebase_id: str
     class Config:
         env_file = ".env"
 
