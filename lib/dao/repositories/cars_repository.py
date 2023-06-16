@@ -26,7 +26,6 @@ class CarRepository:
             database.commit()
         except:
             database.rollback()
-        print('esse e o carro')
         return car
 
     @staticmethod
