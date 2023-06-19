@@ -1,18 +1,28 @@
 from pydantic import BaseModel
 
 class WalletBase(BaseModel):
-    '''Classe para definir os modelos recebidos na API'''
+    '''...'''
     qtdCreditos: int
+    qtdCreditosSolicitados: int
+
+
+class WalletRequestCreditos(BaseModel):
+    '''...'''
+    qtdCreditos: int
+
+
+class WalletRequestSolicita(BaseModel):
+    '''...'''
     qtdCreditosSolicitados: int
 
 
 class WalletRequest(WalletBase):
     '''...'''
+    cpf: str 
 
 
-class WalletResponse(WalletBase):
+class WalletResponse(WalletRequest):
     '''Classe para definir a carteira devolvida pela API'''
     idCarteira: int
-    cpf: str 
     class Config:
         orm_mode = True

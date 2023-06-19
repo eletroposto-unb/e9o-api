@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from api.wallet.schema import WalletRequest, WalletResponse
+from api.wallet.schema import WalletRequest, WalletResponse, WalletRequestCreditos, WalletRequestSolicita
 
 from lib.dao.database import get_database
 from lib.dao.repositories.wallet_repository import WalletRepository
@@ -38,13 +38,13 @@ def show_credits(
   return WalletResponse.from_orm(res)
 
 
-@wallets.put("/{cfp}",
+@wallets.put("/creditos/{cfp}",
     status_code = status.HTTP_200_OK,
     response_model=WalletResponse
 )
 def update(
     cpf: str,
-    request: WalletRequest,  
+    request: WalletRequestCreditos,  
     database: Session = Depends(get_database)
   ):
     '''atualiza os dados do carro'''
@@ -57,10 +57,34 @@ def update(
         status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
       )
     else:
-      wallet = Wallet(**request.dict())
-      wallet.idCarteira = old_wallet.idCarteira
-      wallet.cpf = cpf
-      wallet = WalletRepository.update(wallet, database)
+      new_wallet = Wallet(**request.dict())
+      old_wallet.qtdCreditos = new_wallet.qtdCreditos
+      wallet = WalletRepository.update(old_wallet, database)
+      return WalletResponse.from_orm(wallet)
+    
+
+@wallets.put("/creditosSolicitados/{cfp}",
+    status_code = status.HTTP_200_OK,
+    response_model=WalletResponse
+)
+def update(
+    cpf: str,
+    request: WalletRequestSolicita,  
+    database: Session = Depends(get_database)
+  ):
+    '''atualiza os dados do carro'''
+    old_wallet = WalletRepository.find_user_credits(cpf, database=database)
+
+    print('old', old_wallet)
+
+    if(not old_wallet):
+      raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
+      )
+    else:
+      new_wallet = Wallet(**request.dict())
+      old_wallet.qtdCreditosSolicitados = new_wallet.qtdCreditosSolicitados
+      wallet = WalletRepository.update(old_wallet, database)
       return WalletResponse.from_orm(wallet)
 
 
