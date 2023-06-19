@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from api.wallet.schema import WalletRequest, WalletResponse
 
 from lib.dao.database import get_database
@@ -12,8 +12,7 @@ wallets = APIRouter(
     responses = {404: {"description": "Not found"}},
 )
 
-@wallets.post(
-    "/register/",
+@wallets.post("/register/",
     status_code = status.HTTP_201_CREATED,
     response_model=WalletResponse
 )
@@ -25,8 +24,8 @@ def create_wallet(
   res = WalletRepository.create(Wallet(**request.dict()), database=database)
   return WalletResponse.from_orm(res)
 
-@wallets.get(
-    "/credits/{cpf}",
+
+@wallets.get("/credits/{cpf}",
     status_code = status.HTTP_200_OK,
     response_model=WalletResponse
 )
@@ -38,8 +37,34 @@ def show_credits(
   res = WalletRepository.find_user_credits(cpf, database=database) 
   return WalletResponse.from_orm(res)
 
-@wallets.delete(
-    "/{id}",
+
+@wallets.put("/{cfp}",
+    status_code = status.HTTP_200_OK,
+    response_model=WalletResponse
+)
+def update(
+    cpf: str,
+    request: WalletRequest,  
+    database: Session = Depends(get_database)
+  ):
+    '''atualiza os dados do carro'''
+    old_wallet = WalletRepository.find_user_credits(cpf, database=database)
+
+    print('old', old_wallet)
+
+    if(not old_wallet):
+      raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
+      )
+    else:
+      wallet = Wallet(**request.dict())
+      wallet.idCarteira = old_wallet.idCarteira
+      wallet.cpf = cpf
+      wallet = WalletRepository.update(wallet, database)
+      return WalletResponse.from_orm(wallet)
+
+
+@wallets.delete("/{id}",
     status_code = status.HTTP_200_OK,
     response_model=WalletResponse
 )

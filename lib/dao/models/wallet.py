@@ -9,6 +9,5 @@ class Wallet(Base):
     idCarteira: int = Column(Integer, Sequence('seq_wallet_table') ,primary_key=True, index=True)
     qtdCreditos: int = Column(Integer)
     qtdCreditosSolicitados: int = Column(Integer)
-
     cpf: str = Column(String(11), ForeignKey(User.cpf), nullable=False)
     
