@@ -50,8 +50,6 @@ def update(
     '''atualiza os dados do carro'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
 
-    print('old', old_wallet)
-
     if(not old_wallet):
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
@@ -74,8 +72,6 @@ def update(
   ):
     '''atualiza os dados do carro'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
-
-    print('old', old_wallet)
 
     if(not old_wallet):
       raise HTTPException(
