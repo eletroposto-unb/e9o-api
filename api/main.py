@@ -71,7 +71,7 @@ whitelist = [
 async def teste(request: Request, call_next):
     print("Verificação do token")
 
-    print(request.path_params)
+    # print(request.path_params)
 
     if not firebase_admin._apps:
         credential = firebase_admin.credentials.Certificate('eletroposto-e9o-firebase-adminsdk-vgpsy-d158db5099.json')
@@ -89,12 +89,12 @@ async def teste(request: Request, call_next):
         uid = res['user_id']
 
         user = UserRepository.find_by_uid(uid, database=get_database())
-        if (not user):
+        if (not user or user.status == 'inactive'):
             json_user = jsonable_encoder(user)
             print(json_user)
             return JSONResponse(content=json_user, status_code=status.HTTP_404_NOT_FOUND)
         
-        elif(user.is_admin == False):
+        elif(user.is_admin == False or user.status == 'active'):
             if not any(request.url.path.startswith(obj['route']) and obj['method'] == request.method for obj in whitelist):
                 json_user = jsonable_encoder(user)
                 print(json_user)
