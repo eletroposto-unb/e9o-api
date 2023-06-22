@@ -3,6 +3,7 @@ from lib.dao.database import initialize_database
 
 from api.user.controller import users
 from api.car.controller import cars
+from api.wallet.controller import wallets
 from api.station_address.controller import stations
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +25,7 @@ api.add_middleware(
 api.include_router(users)
 api.include_router(cars)
 api.include_router(stations)
+api.include_router(wallets)
 
 @api.on_event("startup")
 async def startup():
