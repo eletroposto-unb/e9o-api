@@ -27,8 +27,8 @@ def return_charge_status(idStation: str):
     now = datetime.now()
     minute = now.time().minute
     print(f"Minute {minute}")
-    print(f"Actual station state {(minute//5)}")
-    return (minute//5)%2
+    print(f"Actual station state {(minute//2)}")
+    return (minute//2)%2
 
 @microcontroller.post("/{idStation}/totem/temperature",
     status_code = status.HTTP_202_ACCEPTED

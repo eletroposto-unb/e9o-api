@@ -24,7 +24,13 @@ class StationFields(str, Enum):
     battery_current = 'battery_current'
     inverter_voltage = 'inverter_voltage'
     inverter_current = 'inverter_current'
-    
+
+def get_firestore_doc(idStation: str):
+    '''
+        Return the document for station idStation 
+    '''
+    doc_ref = stations_ref.document(idStation)
+    return doc_ref.get().to_dict()
 
 def get_firestore_field(idStation: str, field: float) -> str:
     '''
@@ -39,9 +45,9 @@ def set_firestore_field(idStation: str, field: str, value: float) -> None:
         Set a field with a value into collections of Stations
     '''
     doc_ref = stations_ref.document(idStation)
-    doc_ref.set({
-        f'{field}':  value
-    })
+    doc = get_firestore_doc(idStation)
+    doc[field] = value
+    doc_ref.set(doc)
 
 def check_temperature(idStation: str, temperature: float) -> None:
     status = get_firestore_field(idStation, 'status')
