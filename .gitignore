@@ -39,3 +39,6 @@ archive.zip
 
 # alembic
 /migrations/versions/*
+
+# Firestore secret
+firestore_key.json
