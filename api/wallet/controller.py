@@ -38,7 +38,7 @@ def show_credits(
   return WalletResponse.from_orm(res)
 
 
-@wallets.put("/creditos/{cfp}",
+@wallets.put("/aprovaCreditos/{cpf}",
     status_code = status.HTTP_200_OK,
     response_model=WalletResponse
 )
@@ -47,18 +47,25 @@ def update(
     request: WalletRequestCreditos,  
     database: Session = Depends(get_database)
   ):
-    '''atualiza os dados do carro'''
+    '''atualiza os créditos da carteira'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
 
+    requestBody = request.dict()
     if(not old_wallet):
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
       )
-    else:
-      new_wallet = Wallet(**request.dict())
-      old_wallet.qtdCreditos = new_wallet.qtdCreditos
+    elif(requestBody["aprovado"]):
+      old_wallet.qtdCreditos = old_wallet.qtdCreditos + old_wallet.qtdCreditosSolicitados
+      old_wallet.qtdCreditosSolicitados = 0
       wallet = WalletRepository.update(old_wallet, database)
       return WalletResponse.from_orm(wallet)
+    else:
+      old_wallet.qtdCreditosSolicitados = 0
+      wallet = WalletRepository.update(old_wallet, database)
+      return WalletResponse.from_orm(wallet)
+      
+      
     
 
 @wallets.put("/creditosSolicitados/{cfp}",
@@ -70,7 +77,7 @@ def update(
     request: WalletRequestSolicita,  
     database: Session = Depends(get_database)
   ):
-    '''atualiza os dados do carro'''
+    '''atualiza os créditos solicitados'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
 
     if(not old_wallet):

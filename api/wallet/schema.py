@@ -8,7 +8,7 @@ class WalletBase(BaseModel):
 
 class WalletRequestCreditos(BaseModel):
     '''...'''
-    qtdCreditos: int
+    aprovado: bool
 
 
 class WalletRequestSolicita(BaseModel):
