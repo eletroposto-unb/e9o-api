@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.user import User
+from lib.dao.models.wallet import Wallet
 
 class UserRepository:
     @staticmethod
@@ -11,22 +12,36 @@ class UserRepository:
     @staticmethod
     def find_by_key(cpf, database: Session) -> User:
         '''Função para fazer uma query com base no cpf'''
-        return database.query(User).filter(User.cpf == cpf).first()
+        user = database.query(User).filter(User.cpf == cpf).first()
+        user_wallet = database.query(Wallet).filter(Wallet.cpf == user.cpf).first()
+        user.wallet = user_wallet
+        return user
 
     @staticmethod
     def find_by_uid(firebase_uid, database: Session) -> User:
-        '''Função para fazer uma query com base no cpf'''
-        return database.query(User).filter(User.firebase_uid == firebase_uid).first()
+        '''Função para fazer uma query com base no uid'''
+        user = database.query(User).filter(User.firebase_uid == firebase_uid).first()
+        user_wallet = database.query(Wallet).filter(Wallet.cpf == user.cpf).first()
+        user.wallet = user_wallet
+        return user
     
     @staticmethod
-    def create(firebase_uid, user: User, database: Session) -> User:
+    def create(firebase_uid, user: User, wallet: Wallet, database: Session) -> User:
         '''Função para criar um usuario'''
         try:
             user.firebase_uid = firebase_uid
             database.add(user)
             database.commit()
+
+            wallet.cpf = user.cpf
+            database.add(wallet)
+            database.commit()
         except:
             database.rollback()
+
+        database.refresh(wallet)
+
+        user.wallet = wallet
         return user
 
     @staticmethod

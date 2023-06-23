@@ -1,8 +1,9 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from api.user.schema import UserRequest, UserResponse
+from api.user.schema import UserRequest, UserResponse, UserWalletResponse
 from lib.dao.models.user import User
+from lib.dao.models.wallet import Wallet
 from lib.dao.repositories.user_repository import UserRepository
 from lib.dao.database import get_database
 
@@ -16,20 +17,30 @@ users = APIRouter(
 
 @users.post("/register/{firebase_uid}",
     status_code = status.HTTP_201_CREATED,
-    response_model=UserResponse
+    response_model=UserWalletResponse
 )
 def create(
     firebase_uid,
     request: UserRequest, 
     database: Session = Depends(get_database)
     ):
-    '''Cria e salva um usuário'''
-    user = UserRepository.create(firebase_uid, User(**request.dict()), database=database)
+
+    req = request.dict()
+
+    user = {key: req[key] for key in req.keys()
+              & {'name', 'surname', 'email','cpf', 'is_admin',
+                'telefone', 'status'}}
+    
+    wallet = {key: req[key] for key in req.keys()
+              & {'qtdCreditos', 'qtdCreditosSolicitados'}}
+
+    '''Cria e salva um usuário e carteira'''
+    user = UserRepository.create(firebase_uid, User(**user), Wallet(**wallet), database=database)
     return user
 
 @users.get("/user/cpf/{cpf}",
     status_code = status.HTTP_200_OK,
-    response_model=UserResponse
+    response_model=UserWalletResponse
 )
 def find_one_by_cpf(
     cpf,
@@ -45,7 +56,7 @@ def find_one_by_cpf(
 
 @users.get("/user/uid/{firebase_uid}",
     status_code = status.HTTP_200_OK,
-    response_model=UserResponse
+    response_model=UserWalletResponse
 )
 def find_one_by_uid(
     firebase_uid,
@@ -57,7 +68,8 @@ def find_one_by_uid(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
         )
-    return UserResponse.from_orm(user)
+    
+    return UserWalletResponse.from_orm(user)
 
 @users.get("/",
     status_code=status.HTTP_200_OK,
