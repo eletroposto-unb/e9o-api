@@ -24,6 +24,7 @@ class StationFields(str, Enum):
     battery_current = 'battery_current'
     inverter_voltage = 'inverter_voltage'
     inverter_current = 'inverter_current'
+    status = 'status'
 
 def get_firestore_doc(idStation: str):
     '''
@@ -50,10 +51,14 @@ def set_firestore_field(idStation: str, field: str, value: float) -> None:
     doc_ref.set(doc)
 
 def check_temperature(idStation: str, temperature: float) -> None:
-    status = get_firestore_field(idStation, 'status')
+    try:
+        status = get_firestore_field(idStation, StationFields.status)
+    except:
+        set_firestore_field(idStation, StationFields.status, StationStatus.ONLINE)
+        status = StationStatus.ONLINE
     if temperature > 50.0:
         status = StationStatus.OFFLINE
     print(f'Id Station {idStation}, Temperature: {temperature}, Status: {status}')
-    set_firestore_field(idStation, 'status', status)
+    set_firestore_field(idStation, StationFields.status, status)
 
     
