@@ -24,6 +24,9 @@ class StationFields(str, Enum):
     battery_current = 'battery_current'
     inverter_voltage = 'inverter_voltage'
     inverter_current = 'inverter_current'
+    charge = 'charge'
+    charge_time = 'charge_time'
+    charge_start_time = 'charge_start_time'
     status = 'status'
 
 def get_firestore_doc(idStation: str):

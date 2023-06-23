@@ -1,7 +1,7 @@
+from datetime import datetime, timedelta
 from fastapi import APIRouter, status
-from datetime import datetime
 
-from lib.firestore.firestore import check_temperature, set_firestore_field, StationFields
+from lib.firestore.firestore import ChargeStatus, check_temperature, get_firestore_field, set_firestore_field, StationFields
 
 
 microcontroller  = APIRouter(
@@ -22,13 +22,18 @@ def return_charge_status(idStation: str):
         When this method returns 1, then the charge must be running
         If returns 0, then the charge must be stoepped.
     '''
-    # It can get the current status of 
-    # return get_firestore_field(idPosto, 'charge')
+    charge_start_time = get_firestore_field(idStation, StationFields.charge_start_time)
+    charge_time = get_firestore_field(idStation, StationFields.charge_time)
+
     now = datetime.now()
-    minute = now.time().minute
-    print(f"Minute {minute}")
-    print(f"Actual station state {(minute//2)}")
-    return (minute//2)%2
+    charge_end_time = charge_start_time + timedelta(minutes=charge_time)
+    charge_end_time = datetime.isoformat(charge_end_time)
+    charge_end_time = charge_end_time[:26]
+    charge_end_time = datetime.fromisoformat(charge_end_time)
+    if now > charge_end_time:
+        set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
+    charge_status = get_firestore_field(idStation, StationFields.charge)
+    return charge_status
 
 @microcontroller.post("/{idStation}/totem/temperature",
     status_code = status.HTTP_202_ACCEPTED
