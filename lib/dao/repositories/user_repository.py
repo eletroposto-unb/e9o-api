@@ -9,6 +9,17 @@ class UserRepository:
         '''Função para fazer uma query de todas as User da DB'''
         return database.query(User).all()
     
+    def find_all_user_wallet(database: Session) -> List[object]:
+        '''Função para fazer uma query de todas as User da DB com suas carteiras'''
+        users = database.query(User).all()
+        res = []
+        for user in users:
+            user_wallet = database.query(Wallet).filter(Wallet.cpf==user.cpf).first()
+            user.wallet = user_wallet
+            res.append(user)
+
+        return res
+    
     @staticmethod
     def find_by_key(cpf, database: Session) -> User:
         '''Função para fazer uma query com base no cpf'''

@@ -73,13 +73,13 @@ def find_one_by_uid(
 
 @users.get("/",
     status_code=status.HTTP_200_OK,
-    response_model=List[UserResponse]
+    response_model=List[UserWalletResponse]
 )
 def find_all(
     database: Session = Depends(get_database)
     ):
-    users = UserRepository.find_all(database=database)
-    return [UserResponse.from_orm(user) for user in users]
+    users = UserRepository.find_all_user_wallet(database=database)
+    return [UserWalletResponse.from_orm(user) for user in users]
 
 @users.put("/{cpf}",
     status_code = status.HTTP_200_OK,
