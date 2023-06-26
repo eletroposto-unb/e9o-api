@@ -1,6 +1,5 @@
 from fastapi import Depends, FastAPI, Request, status
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.user.controller import users
@@ -10,8 +9,7 @@ from api.station_address.controller import stations
 from api.dependencies.verifyuser import verify_user
 
 from lib.config.env import settings
-from lib.dao.repositories.user_repository import UserRepository
-from lib.dao.database import initialize_database, get_database
+from lib.dao.database import initialize_database
 
 
 import firebase_admin
@@ -39,6 +37,8 @@ api.include_router(wallets)
 @api.middleware("http")
 async def teste(request: Request, call_next):
     print("Verificação do token")
+
+    print(request.url.path)
 
     # print(request.path_params)
 

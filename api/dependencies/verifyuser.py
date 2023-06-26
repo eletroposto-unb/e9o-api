@@ -57,9 +57,9 @@ def verify_user(request: Request, database: Session = Depends(get_database)):
   uid = request.state.uid
   user = UserRepository.find_by_uid(uid, database=database)
   if (not user or user.status == 'inactive'):
-      json_user = jsonable_encoder(user)
-      print(json_user)
-      return JSONResponse(content=json_user, status_code=status.HTTP_404_NOT_FOUND)
+    json_user = jsonable_encoder(user)
+    print(json_user)
+    return JSONResponse(content=json_user, status_code=status.HTTP_404_NOT_FOUND)
   
   elif(user.is_admin == False and user.status == 'active'):
       if not (request.url.path.startswith(obj['route']) and obj['method'] == request.method for obj in whitelist):

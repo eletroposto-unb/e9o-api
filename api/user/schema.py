@@ -1,3 +1,4 @@
+from typing import List
 from pydantic import BaseModel
 
 from enum import Enum
@@ -23,5 +24,19 @@ class UserRequest(UserBase):
 class UserResponse(UserBase):
     '''Classe para definir o Usuário devolvido pela API'''
     firebase_uid: str
+    class Config:
+        orm_mode = True
+
+class UserRequestResponse(UserBase):
+    '''Classe para definir o Usuário devolvido pela API'''
+    firebase_uid: str
+    user_request: object
+    class Config:
+        orm_mode = True
+
+class UserRequestListResponse():
+    '''Classe para definir o Usuário devolvido pela API'''
+    users: List[object]
+    user_request: object
     class Config:
         orm_mode = True

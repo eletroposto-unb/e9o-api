@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import Request
 from sqlalchemy.orm import Session
 from lib.dao.models.user import User
 
@@ -39,6 +40,7 @@ class UserRepository:
                 database.commit()
         except:
             database.rollback()
+        database.refresh(user)
         return user
     
     @staticmethod
@@ -46,8 +48,11 @@ class UserRepository:
         '''Função para atualizar um objeto na DB'''
         try:
             if user.cpf:
+                print(user.status)
                 database.merge(user)
                 database.commit()
         except:
             database.rollback()
+        
+        database.refresh(user)
         return user
