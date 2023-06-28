@@ -1,11 +1,12 @@
 from typing import List
+from fastapi import HTTPException, Request, status
 from sqlalchemy.orm import Session
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
 
 class StationRepository:
     @staticmethod
-    def create(station: Station, address: Address, database: Session) -> Station:
+    def create(station: Station, address: Address, req_user: object , database: Session) -> Station:
         '''Função para criar um posto'''
         try:
             database.add(address)
@@ -17,10 +18,12 @@ class StationRepository:
             database.refresh(station)
         except:
             database.rollback()
-
+            
+        print(req_user.name)
         res = {
             'station': station,
             'address': address,
+            'req_user:': req_user
         }
         return res
     
@@ -57,7 +60,7 @@ class StationRepository:
         return database.query(Address).filter(idEndereco==Address.idEndereco).first()
     
     @staticmethod
-    def update_station(old_station: Station, station: Station, address: Address, database: Session) -> object:
+    def update_station(old_station: Station, station: Station, address: Address, req_user: object, database: Session) -> object:
         try:
             station.idEndereco = old_station['address'].idEndereco
             address.idEndereco = old_station['address'].idEndereco
@@ -71,16 +74,18 @@ class StationRepository:
         except:
             database.rollback()
 
+        print(req_user.name)
         res = {
             'station': station,
-            'address': address
+            'address': address,
+            'req_user:': req_user
         }
         return res
         
         # return station
     
     @staticmethod
-    def delete_by_id(idPosto: int, database: Session) -> object:
+    def delete_by_id(idPosto: int, req_user: object, database: Session) -> object:
         station = database.query(Station).filter(Station.idPosto == idPosto).first()
         address = database.query(Address).filter(Address.idEndereco == station.idEndereco).first()
         if station and address is not None:
@@ -88,8 +93,15 @@ class StationRepository:
             database.commit()
             database.delete(address)
             database.commit()
+            print(req_user.name)
             res = {
                 'station': station,
-                'address': address
+                'address': address,
+                'req_user:': req_user
             }
             return res
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Posto não existe"
+            )
+        

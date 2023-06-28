@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status, Depends
 
 from api.station_address.schema import AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
@@ -19,9 +19,14 @@ stations = APIRouter(
     status_code = status.HTTP_201_CREATED
 )
 def create(
-    request: StationRequest, 
+    request: StationRequest,
+    req_user: Request,
     database: Session = Depends(get_database)
     ):
+
+    if hasattr(req_user.state, 'exception'):
+        return req_user.state.exception
+
     '''Cria e salva um posto'''
     req = request.dict()
 
@@ -33,8 +38,8 @@ def create(
               & {'cep', 'comodidade', 'latitude', 'longitude', 'estado',
                  'cidade', 'endereco', 'numero', 'complemento'}}
     
-    res = StationRepository.create(Station(**station), Address(**address), database=database)
-
+    res = StationRepository.create(Station(**station), Address(**address), req_user.state.user, database=database)
+    
     return res
 
 @stations.get("/",
@@ -62,7 +67,11 @@ def find_stations_address(idEndereco, database: Session = Depends(get_database))
 @stations.put('/station/{idPosto}',
               status_code = status.HTTP_200_OK,
               )
-def update_station(idPosto, request: StationRequest, database: Session = Depends(get_database)):
+def update_station(idPosto, req_user: Request, request: StationRequest, database: Session = Depends(get_database)):
+    
+    if hasattr(req_user.state, 'exception'):
+        return req_user.state.exception
+    
     '''atualiza os dados do posto'''
     old_station = StationRepository.find_station_by_id(idPosto=idPosto,database=database)
 
@@ -81,16 +90,24 @@ def update_station(idPosto, request: StationRequest, database: Session = Depends
               & {'cep', 'comodidade', 'latitude', 'longitude', 'estado',
                  'cidade', 'endereco', 'numero', 'complemento'}}
                  
-        res = StationRepository.update_station(old_station,Station(**new_station), Address(**new_address), database=database)
+        res = StationRepository.update_station(old_station,Station(**new_station), Address(**new_address), req_user.state.user, database=database)
+        
         return res
     
 @stations.delete('/station/{idPosto}',
                     status_code = status.HTTP_200_OK,
                     )
-def delete_by_id(idPosto: int, database: Session = Depends(get_database)):
+def delete_by_id(idPosto: int, req_user: Request, database: Session = Depends(get_database)):
+    
+    if hasattr(req_user.state, 'exception'):
+        return req_user.state.exception
+    
+    '''Deleta posto pelo id'''
     if not StationRepository.find_station_by_id(idPosto, database):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Posto não encontrado"
         )
-    res = StationRepository.delete_by_id(idPosto, database)
+    
+    res = StationRepository.delete_by_id(idPosto, req_user.state.user, database)
+    
     return res
