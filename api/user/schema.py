@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from api.wallet.schema import WalletBase
 
 from enum import Enum
 
@@ -23,5 +24,12 @@ class UserRequest(UserBase):
 class UserResponse(UserBase):
     '''Classe para definir o Usuário devolvido pela API'''
     firebase_uid: str
+    class Config:
+        orm_mode = True
+
+class UserWalletResponse(UserBase):
+    '''Classe para definir o Usuário devolvido pela API'''
+    firebase_uid: str
+    wallet: object
     class Config:
         orm_mode = True
