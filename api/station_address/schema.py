@@ -52,3 +52,7 @@ class AddressResponse(AddressBase):
     idEndereco: int
     class Config:
         orm_mode = True
+
+
+class ActiveStation(BaseModel):
+    charge_time: int

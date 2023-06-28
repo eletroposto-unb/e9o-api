@@ -1,13 +1,17 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status, Depends
 
-from api.station_address.schema import AddressResponse, StationObjectResponse, StationRequest, StationResponse
+from api.station_address.schema import ActiveStation, AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
 from lib.dao.repositories.station_repository import StationRepository
 from lib.dao.database import get_database
 
+from datetime import datetime
+
 from sqlalchemy.orm import Session
+
+from lib.firestore.firestore import ChargeStatus, StationFields, set_firestore_field
 
 stations = APIRouter(
     prefix = '/stations',
@@ -94,3 +98,15 @@ def delete_by_id(idPosto: int, database: Session = Depends(get_database)):
         )
     res = StationRepository.delete_by_id(idPosto, database)
     return res
+
+@stations.post("/activate/{idStation}",
+    status_code = status.HTTP_200_OK
+)
+def activate_post(
+    idStation: str,
+    request: ActiveStation
+    ):
+    '''Cria e salva um posto'''
+    set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
+    set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
+    set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
