@@ -23,5 +23,6 @@ class CarRequest(CarBase):
 class CarResponse(CarBase):
     '''Classe para definir o Carro devolvido pela API'''
     id: int
+    user_request: object
     class Config:
         orm_mode = True

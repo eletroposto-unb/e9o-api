@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from lib.dao.models.car import Car
 
@@ -45,3 +46,7 @@ class CarRepository:
             database.delete(car)
             database.commit()
             return car
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
+            )
