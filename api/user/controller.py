@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, HTTPException, Request, status, Depends
 
 from api.user.schema import UserRequest, UserResponse, UserRequestResponse, UserRequestListResponse, statusEnum
@@ -36,6 +35,10 @@ def find_one_by_cpf(
     cpf,
     database: Session = Depends(get_database)
     ):
+
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+
     '''Procura um usuário pelo cpf'''
     user = UserRepository.find_by_key(cpf, database=database)
     if not user:
@@ -55,6 +58,10 @@ def find_one_by_uid(
     firebase_uid,
     database: Session = Depends(get_database)
     ):
+
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+    
     '''Procura um usuário pelo firebase_uid'''
     user = UserRepository.find_by_uid(firebase_uid, database=database)
     if not user:
@@ -94,6 +101,10 @@ def update(
     req: Request,
     database: Session = Depends(get_database)
     ):
+
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+
     '''atualiza os dados do usuario'''
     user = UserRepository.find_by_key(cpf,database=database)
     if user.status == 'inactive':
@@ -105,7 +116,7 @@ def update(
     
     setattr(updated_user, 'user_request', req.state.user)
     # BUG SEM ESSE PRINT ELE NÃO RETORNA USER_REQUEST
-    print('Usuario que requisitou'+req.state.user.name)
+    print('Usuario que requisitou '+req.state.user.name)
     return updated_user
 
 # Put não está alterando status
@@ -118,6 +129,10 @@ def alter(
     cpf,
     database: Session = Depends(get_database)
     ):
+
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+
     '''Alterna status do usuario. Dessa forma ao invés de deletar usuário, apenas desativa'''
     old_user = UserRepository.find_by_key(cpf, database=database)
     if old_user.status == 'inactive':
@@ -130,5 +145,5 @@ def alter(
     updated_user.user_request = req.state.user
     setattr(updated_user, 'user_request', req.state.user)
     # BUG SEM ESSE PRINT ELE NÃO RETORNA USER_REQUEST
-    print('Usuario que requisitou'+req.state.user.name)
+    print('Usuario que requisitou '+req.state.user.name)
     return updated_user

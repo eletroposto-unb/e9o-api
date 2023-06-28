@@ -10,12 +10,12 @@ class UserRepository:
         return database.query(User).all()
     
     @staticmethod
-    def find_by_key(cpf, database: Session) -> User:
+    def find_by_key(cpf: str, database: Session) -> User:
         '''Função para fazer uma query com base no cpf'''
         return database.query(User).filter(User.cpf == cpf).first()
 
     @staticmethod
-    def find_by_uid(firebase_uid, database: Session) -> User:
+    def find_by_uid(firebase_uid: str, database: Session) -> User:
         '''Função para fazer uma query com base no cpf'''
         return database.query(User).filter(User.firebase_uid == firebase_uid).first()
     
@@ -40,7 +40,7 @@ class UserRepository:
                 database.commit()
         except:
             database.rollback()
-        database.refresh(user)
+            
         return user
     
     @staticmethod
