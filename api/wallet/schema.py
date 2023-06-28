@@ -24,5 +24,6 @@ class WalletRequest(WalletBase):
 class WalletResponse(WalletRequest):
     '''Classe para definir a carteira devolvida pela API'''
     idCarteira: int
+    user_request: object
     class Config:
         orm_mode = True

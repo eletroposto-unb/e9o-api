@@ -1,4 +1,5 @@
 from typing import List
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from lib.dao.models.wallet import Wallet
 
@@ -41,3 +42,7 @@ class WalletRepository:
             database.delete(wallet)
             database.commit()
             return wallet
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
+            )

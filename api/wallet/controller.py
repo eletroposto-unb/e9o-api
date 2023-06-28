@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from api.wallet.schema import WalletRequest, WalletResponse, WalletRequestCreditos, WalletRequestSolicita
 
 from lib.dao.database import get_database
@@ -18,11 +18,19 @@ wallets = APIRouter(
 )
 def create_wallet(
   request: WalletRequest,
+  req: Request,
   database: Session = Depends(get_database)
 ):
+  
+  if hasattr(req.state, 'exception'):
+        return req.state.exception
+  
   '''Cria carteira para usuario'''
-  res = WalletRepository.create(Wallet(**request.dict()), database=database)
-  return WalletResponse.from_orm(res)
+  wallet = WalletRepository.create(Wallet(**request.dict()), database=database)
+
+  wallet.user_request = req.state.user
+  print('usuario '+ wallet.user_request.name + ' requisitou')
+  return wallet
 
 
 @wallets.get("/credits/{cpf}",
@@ -31,11 +39,20 @@ def create_wallet(
 )
 def show_credits(
   cpf: str,
+  req: Request,
   database: Session = Depends(get_database)
 ):
   '''Visualiza total de moedas do usuário'''
-  res = WalletRepository.find_user_credits(cpf, database=database) 
-  return WalletResponse.from_orm(res)
+  wallet = WalletRepository.find_user_credits(cpf, database=database) 
+
+  if not wallet:
+     raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND, detail="Carteira não existe"
+      )
+
+  wallet.user_request = req.state.user
+  print('usuario '+ wallet.user_request.name + ' requisitou')
+  return wallet
 
 
 @wallets.put("/creditos/{cfp}",
@@ -45,8 +62,13 @@ def show_credits(
 def update(
     cpf: str,
     request: WalletRequestCreditos,  
+    req: Request,
     database: Session = Depends(get_database)
   ):
+    
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+    
     '''atualiza os dados do total de creditos'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
 
@@ -58,7 +80,10 @@ def update(
       new_wallet = Wallet(**request.dict())
       old_wallet.qtdCreditos = new_wallet.qtdCreditos
       wallet = WalletRepository.update(old_wallet, database)
-      return WalletResponse.from_orm(wallet)
+
+      wallet.user_request = req.state.user
+      print('usuario '+ wallet.user_request.name + ' requisitou')
+      return wallet
     
 
 @wallets.put("/creditosSolicitados/{cfp}",
@@ -67,9 +92,14 @@ def update(
 )
 def update(
     cpf: str,
-    request: WalletRequestSolicita,  
+    request: WalletRequestSolicita,
+    req: Request,
     database: Session = Depends(get_database)
   ):
+    
+    if hasattr(req.state, 'exception'):
+        return req.state.exception
+    
     '''atualiza os dados de creditos solicitados'''
     old_wallet = WalletRepository.find_user_credits(cpf, database=database)
 
@@ -81,17 +111,27 @@ def update(
       new_wallet = Wallet(**request.dict())
       old_wallet.qtdCreditosSolicitados = new_wallet.qtdCreditosSolicitados
       wallet = WalletRepository.update(old_wallet, database)
-      return WalletResponse.from_orm(wallet)
+
+      wallet.user_request = req.state.user
+      print('usuario '+ wallet.user_request.name + ' requisitou')
+      return wallet
 
 
 @wallets.delete("/{id}",
     status_code = status.HTTP_200_OK,
-    response_model=WalletResponse
 )
 def delete_by_id(
   id: int,
+  req: Request,
   database: Session = Depends(get_database)
 ):
+  
+  if hasattr(req.state, 'exception'):
+        return req.state.exception
+  
   '''Deleta carteira pelo id'''
-  res = WalletRepository.delete_by_id(id, database=database) 
-  return WalletResponse.from_orm(res)
+  wallet = WalletRepository.delete_by_id(id, database=database)
+  
+  setattr(wallet, 'user_request', req.state.user)
+  print('usuario '+ wallet.user_request.name + ' requisitou')
+  return wallet
