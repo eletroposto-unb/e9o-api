@@ -36,6 +36,8 @@ def create(
 
     '''Cria e salva um usuário e carteira'''
     user = UserRepository.create(firebase_uid, User(**user), Wallet(**wallet), database=database)
+
+    print(user.wallet.idCarteira)
     return user
 
 @users.get("/user/cpf/{cpf}",
@@ -52,7 +54,7 @@ def find_one_by_cpf(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
         )
-    return UserResponse.from_orm(user)
+    return user
 
 @users.get("/user/uid/{firebase_uid}",
     status_code = status.HTTP_200_OK,
@@ -69,7 +71,7 @@ def find_one_by_uid(
             status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não existe não encontrado"
         )
     
-    return UserWalletResponse.from_orm(user)
+    return user
 
 @users.get("/",
     status_code=status.HTTP_200_OK,
