@@ -50,8 +50,6 @@ class UserRepository:
         except:
             database.rollback()
 
-        database.refresh(wallet)
-
         user.wallet = wallet
         return user
 
