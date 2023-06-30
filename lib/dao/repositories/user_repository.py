@@ -55,6 +55,7 @@ class UserRepository:
 
     @staticmethod
     def update(firebase_uid: str ,user: User, database: Session) -> User:
+        user_wallet = database.query(Wallet).filter(Wallet.cpf == user.cpf).first()
         '''Função para atualizar um objeto na DB'''
         try:
             if user.cpf:
@@ -63,6 +64,8 @@ class UserRepository:
                 database.commit()
         except:
             database.rollback()
+        
+        user.wallet = user_wallet
         return user
     
     @staticmethod

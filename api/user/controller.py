@@ -85,7 +85,7 @@ def find_all(
 
 @users.put("/{cpf}",
     status_code = status.HTTP_200_OK,
-    response_model=UserResponse
+    response_model=UserWalletResponse
 )
 def update(
     cpf: str,
@@ -100,7 +100,9 @@ def update(
         )
     else:
         updated_user = UserRepository.update(user.firebase_uid, User(**request.dict()), database=database)
-    return UserResponse.from_orm(updated_user)
+
+    print(updated_user.wallet.idCarteira)
+    return updated_user
 
 @users.put("/alterstatus/{cpf}",
     status_code = status.HTTP_200_OK,
