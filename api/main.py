@@ -12,6 +12,7 @@ api = FastAPI()
 
 origins = [
     "http://localhost:3000",
+    "https://eletrogama.online"
 ]
 
 api.add_middleware(
