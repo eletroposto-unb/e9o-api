@@ -1,0 +1,25 @@
+from typing import List
+from fastapi import APIRouter, HTTPException, status, Depends
+
+from api.history.schema import CreateHistoryResponse, HistoryRequest
+from lib.dao.models.history import History
+from lib.dao.repositories.history_repository import HistoryRepository
+from lib.dao.database import get_database
+from sqlalchemy.orm import Session
+
+history = APIRouter(
+    prefix = '/history',
+    tags = ['history'],
+    responses = {404: {"description": "Not found"}},
+)
+
+
+@history.post("/register/",
+    status_code = status.HTTP_201_CREATED,
+    response_model=CreateHistoryResponse
+)
+def create(request: HistoryRequest, db: Session = Depends(get_database)):
+    '''Cria e salva historico'''
+    history = HistoryRepository.create(db ,History(**request.dict()))
+
+    return history
