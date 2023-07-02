@@ -12,3 +12,13 @@ class HistoryRepository:
         except:
             database.rollback()
         return history
+    
+    @staticmethod
+    def find_all_by_cpf(cpf, database: Session) -> object:
+        '''Função para fazer uma query de todos os Carros do DB'''
+        histories = database.query(History).filter(cpf == History.cpf).all()
+
+        res = {
+            "user_history": histories
+        }
+        return res

@@ -23,3 +23,13 @@ def create(request: HistoryRequest, db: Session = Depends(get_database)):
     history = HistoryRepository.create(db ,History(**request.dict()))
 
     return history
+
+
+@history.get("/user/{cpf}",
+    status_code = status.HTTP_200_OK,
+)
+def find_by_cpf(cpf: str, db: Session = Depends(get_database)):
+    '''Cria e salva historico'''
+    res = HistoryRepository.find_all_by_cpf(cpf, db)
+
+    return res
