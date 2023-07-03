@@ -1,6 +1,7 @@
 from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.history import History
+from lib.dao.models.station import Station
 
 class HistoryRepository:
     @staticmethod
@@ -17,6 +18,9 @@ class HistoryRepository:
     def find_all_by_cpf(cpf, database: Session) -> object:
         '''Função para fazer uma query de todos os Carros do DB'''
         histories = database.query(History).filter(cpf == History.cpf).all()
+        for history in histories:
+            posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
+            history.posto = posto
 
         res = {
             "user_history": histories
