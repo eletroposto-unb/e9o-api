@@ -2,10 +2,10 @@ from firebase_admin import credentials, firestore, initialize_app
 from lib.config.env import settings
 from enum import Enum
 
-# cred = credentials.Certificate(settings.firestore_key)
-# app = initialize_app(cred)
-# db = firestore.client()
-# stations_ref = db.collection(u'station')
+cred = credentials.Certificate(settings.firestore_key)
+app = initialize_app(cred)
+db = firestore.client()
+stations_ref = db.collection(u'station')
 
 class StationStatus(str, Enum):
     ONLINE = 'online'
