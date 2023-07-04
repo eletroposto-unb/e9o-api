@@ -18,7 +18,7 @@ class HistoryRepository:
     @staticmethod
     def find_all(database: Session) -> object:
         '''Função para fazer uma query de todos os historicos do DB'''
-        histories = database.query(History)
+        histories = database.query(History).all()
         for history in histories:
             posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
             usuario = database.query(User).filter(User.cpf == history.cpf).first()
@@ -48,7 +48,7 @@ class HistoryRepository:
         '''Função para fazer uma query de todos os historicos de um posto do DB'''
         histories = database.query(History).filter(idPosto == History.idPosto).all()
         for history in histories:
-            posto = database.query(Station).filter(Station.idPosto == history.idPosto).first().nome
+            posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
             usuario = database.query(User).filter(User.cpf == history.cpf).first()
             history.posto = posto
             history.usuario = usuario
