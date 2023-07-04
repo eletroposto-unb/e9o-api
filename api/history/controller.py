@@ -43,3 +43,13 @@ def find_by_cpf(cpf: str, db: Session = Depends(get_database)):
     res = HistoryRepository.find_all_by_cpf(cpf, db)
 
     return res
+
+
+@history.get("/station/{idPosto}",
+    status_code = status.HTTP_200_OK,
+)
+def find_by_station_id(idPosto: str, db: Session = Depends(get_database)):
+    '''Busca historicos por id do posto'''
+    res = HistoryRepository.find_by_station_id(idPosto, db)
+
+    return res
