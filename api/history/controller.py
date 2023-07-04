@@ -25,11 +25,21 @@ def create(request: HistoryRequest, db: Session = Depends(get_database)):
     return history
 
 
+@history.get("/",
+    status_code = status.HTTP_200_OK,
+)
+def find_all(db: Session = Depends(get_database)):
+    '''Busca todos os historicos'''
+    res = HistoryRepository.find_all(db)
+
+    return res
+
+
 @history.get("/user/{cpf}",
     status_code = status.HTTP_200_OK,
 )
 def find_by_cpf(cpf: str, db: Session = Depends(get_database)):
-    '''Cria e salva historico'''
+    '''Busca historicos por cpf do usuario'''
     res = HistoryRepository.find_all_by_cpf(cpf, db)
 
     return res
