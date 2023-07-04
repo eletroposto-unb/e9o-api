@@ -14,6 +14,7 @@ class HistoryBase(BaseModel):
   valorTotal: float
   idPosto: int 
   cpf: str 
+  idCarro: int
 
 class HistoryRequest(HistoryBase):
   '''...'''

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from lib.dao.models.history import History
 from lib.dao.models.station import Station
 from lib.dao.models.user import User
+from lib.dao.models.car import Car
 
 class HistoryRepository:
     @staticmethod
@@ -22,8 +23,10 @@ class HistoryRepository:
         for history in histories:
             posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
             usuario = database.query(User).filter(User.cpf == history.cpf).first()
+            carro = database.query(Car).filter(Car.id == history.idCarro).first()
             history.posto = posto
             history.usuario = usuario
+            history.carro = carro
 
         res = {
             "history": histories
@@ -36,24 +39,13 @@ class HistoryRepository:
         histories = database.query(History).filter(cpf == History.cpf).all()
         for history in histories:
             posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
-            history.posto = posto
-
-        res = {
-            "user_history": histories
-        }
-        return res
-
-    @staticmethod
-    def find_by_station_id(idPosto, database: Session) -> object:
-        '''Função para fazer uma query de todos os historicos de um posto do DB'''
-        histories = database.query(History).filter(idPosto == History.idPosto).all()
-        for history in histories:
-            posto = database.query(Station).filter(Station.idPosto == history.idPosto).first()
             usuario = database.query(User).filter(User.cpf == history.cpf).first()
+            carro = database.query(Car).filter(Car.id == history.idCarro).first()
             history.posto = posto
+            history.carro = carro
             history.usuario = usuario
 
         res = {
-            "station_history": histories
+            "history": histories
         }
         return res
