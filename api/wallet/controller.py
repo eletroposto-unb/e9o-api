@@ -14,7 +14,6 @@ wallets = APIRouter(
 
 @wallets.post("/register/",
     status_code = status.HTTP_201_CREATED,
-    response_model=WalletResponse
 )
 def create_wallet(
   request: WalletRequest,
@@ -22,7 +21,7 @@ def create_wallet(
 ):
   '''Cria carteira para usuario'''
   res = WalletRepository.create(Wallet(**request.dict()), database=database)
-  return WalletResponse.from_orm(res)
+  return res
 
 
 @wallets.get("/credits/{cpf}",
