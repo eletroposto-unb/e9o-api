@@ -1,10 +1,12 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException, Request, status, Depends
+from api.dependencies.verify_user import tokenToUser
 
 from api.station_address.schema import ActiveStation, AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
 from lib.dao.repositories.station_repository import StationRepository
+from lib.dao.repositories.wallet_repository import WalletRepository
 from lib.dao.database import get_database
 
 from datetime import datetime
@@ -104,9 +106,24 @@ def delete_by_id(idPosto: int, database: Session = Depends(get_database)):
 )
 def activate_post(
     idStation: str,
-    request: ActiveStation
+    request: ActiveStation,
+    database: Session = Depends(get_database),
+    user: object = Depends(tokenToUser)
     ):
+    
+    wallet = WalletRepository.find_user_credits(user.cpf, database=database)
+    wallet.qtdCreditos = wallet.qtdCreditos - request.charge_time
+    if wallet.qtdCreditos < 0 :
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Creditos Insuficientes"
+        )
+    updated_wallet = WalletRepository.update(wallet,database=database)
+    print(updated_wallet.qtdCreditos)
+
     '''Cria e salva um posto'''
     set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
     set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
     set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
+    user.wallet = updated_wallet
+    print(user.wallet)
+    return user

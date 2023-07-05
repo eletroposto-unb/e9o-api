@@ -51,6 +51,7 @@ class UserRepository:
             database.rollback()
 
         user.wallet = wallet
+        print(wallet)
         return user
 
     @staticmethod
