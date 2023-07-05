@@ -5,6 +5,7 @@ from api.user.controller import users
 from api.car.controller import cars
 from api.wallet.controller import wallets
 from api.station_address.controller import stations
+from api.history.controller import history
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -27,6 +28,7 @@ api.include_router(users)
 api.include_router(cars)
 api.include_router(stations)
 api.include_router(wallets)
+api.include_router(history)
 
 @api.on_event("startup")
 async def startup():

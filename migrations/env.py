@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from lib.config.env import settings
 from lib.dao.database import Base
-from lib.dao.models import user, car, station, address, wallet
+from lib.dao.models import user, car, station, address, wallet, history
 
 SQLALCHEMY_DATABASE_URL = settings.db_connect_url
 
