@@ -25,6 +25,10 @@ whitelist = [
         'method': 'GET'
     },
     {
+        'route': '/stations/activate/',
+        'method': 'POST'
+    },
+    {
         'route': '/users/',
         'method': 'GET'
     },
