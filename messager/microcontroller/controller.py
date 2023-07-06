@@ -35,10 +35,10 @@ def return_charge_status(idStation: str):
         charge_end_time = datetime.fromisoformat(charge_end_time)
         if now > charge_end_time:
             charge_status = 0
-    print(charge_status)
     if charge_status == 0:
         set_firestore_field(idStation, StationFields.status, StationStatus.ONLINE)
         set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
+        set_firestore_field(idStation, StationFields.user_cpf, '')
         set_firestore_field(idStation, StationFields.charge_start_time, '')
         set_firestore_field(idStation, StationFields.charge_time, 0)
 

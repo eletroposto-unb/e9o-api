@@ -56,3 +56,4 @@ class AddressResponse(AddressBase):
 
 class ActiveStation(BaseModel):
     charge_time: int
+    id_carro: int

@@ -5,11 +5,12 @@ from api.dependencies.verify_user import tokenToUser
 from api.station_address.schema import ActiveStation, AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
 from lib.dao.models.station import Station
+from lib.dao.repositories.history_repository import HistoryRepository
 from lib.dao.repositories.station_repository import StationRepository
 from lib.dao.repositories.wallet_repository import WalletRepository
 from lib.dao.database import get_database
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
@@ -121,11 +122,38 @@ def activate_post(
     updated_wallet = WalletRepository.update(wallet,database=database)
     print(updated_wallet.qtdCreditos)
 
+    charge_start_time = datetime.now()
+    charge_end_time = charge_start_time + timedelta(minutes=request.charge_time)
+
     '''Cria e salva um posto'''
     set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
     set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
-    set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
+    set_firestore_field(idStation, StationFields.charge_start_time, charge_start_time)
     set_firestore_field(idStation, StationFields.status, StationStatus.BUSY)
+    set_firestore_field(idStation, StationFields.user_cpf, user.cpf)
+
+    HistoryRepository.create(database, history={
+        'horarioEntrada': charge_start_time,
+        'horarioSaida': charge_end_time,
+        'valorTotal': (station['station'].precoKwh * request.charge_time / 60),
+        'idPosto': idStation,
+        'cpf': user.cpf,
+        'idCarro': request.id_carro
+    })
+
     user.wallet = updated_wallet
-    print(user.wallet)
     return user
+
+@stations.delete("/activate/{idStation}",
+    status_code = status.HTTP_204_NO_CONTENT
+)
+def deactivate_delete(
+    idStation: str,
+    database: Session = Depends(get_database),
+    user: object = Depends(tokenToUser)):
+
+    set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
+    set_firestore_field(idStation, StationFields.charge_time, 0)
+    set_firestore_field(idStation, StationFields.charge_start_time, '')
+    set_firestore_field(idStation, StationFields.status, StationStatus.ONLINE)
+    set_firestore_field(idStation, StationFields.user_cpf, '')

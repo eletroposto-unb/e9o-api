@@ -28,6 +28,7 @@ class StationFields(str, Enum):
     charge_time = 'charge_time'
     charge_start_time = 'charge_start_time'
     status = 'status'
+    user_cpf = 'user_cpf'
 
 def get_firestore_doc(idStation: str):
     '''
