@@ -112,7 +112,8 @@ def activate_post(
     ):
     
     wallet = WalletRepository.find_user_credits(user.cpf, database=database)
-    wallet.qtdCreditos = wallet.qtdCreditos - request.charge_time
+    station = StationRepository.find_station_by_id(idStation, database=database)
+    wallet.qtdCreditos = wallet.qtdCreditos - (station['station'].precoKwh * request.charge_time / 60)
     if wallet.qtdCreditos < 0 :
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Creditos Insuficientes"
