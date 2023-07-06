@@ -11,6 +11,11 @@ class WalletRequestCreditos(BaseModel):
     aprovado: bool
 
 
+class WalletRequestDevolve(BaseModel):
+    '''...'''
+    qtdCreditos: int
+
+
 class WalletRequestSolicita(BaseModel):
     '''...'''
     qtdCreditosSolicitados: int
