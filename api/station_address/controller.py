@@ -1,9 +1,11 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Request, status, Depends
+from sqlalchemy import DateTime
 from api.dependencies.verify_user import tokenToUser
 
 from api.station_address.schema import ActiveStation, AddressResponse, StationObjectResponse, StationRequest, StationResponse
 from lib.dao.models.address import Address
+from lib.dao.models.history import History
 from lib.dao.models.station import Station
 from lib.dao.repositories.history_repository import HistoryRepository
 from lib.dao.repositories.station_repository import StationRepository
@@ -111,6 +113,9 @@ def activate_post(
     database: Session = Depends(get_database),
     user: object = Depends(tokenToUser)
     ):
+
+    if get_firestore_field(idStation, StationFields.charge) == ChargeStatus.CHARGING:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="You're not autorized to access this charge")
     
     wallet = WalletRepository.find_user_credits(user.cpf, database=database)
     station = StationRepository.find_station_by_id(idStation, database=database)
@@ -120,7 +125,6 @@ def activate_post(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Creditos Insuficientes"
         )
     updated_wallet = WalletRepository.update(wallet,database=database)
-    print(updated_wallet.qtdCreditos)
 
     charge_start_time = datetime.now()
     charge_end_time = charge_start_time + timedelta(minutes=request.charge_time)
@@ -132,14 +136,15 @@ def activate_post(
     set_firestore_field(idStation, StationFields.status, StationStatus.BUSY)
     set_firestore_field(idStation, StationFields.user_cpf, user.cpf)
 
-    HistoryRepository.create(database, history={
-        'horarioEntrada': charge_start_time,
-        'horarioSaida': charge_end_time,
+    history = {
+        'horarioEntrada': charge_start_time.isoformat(),
+        'horarioSaida': charge_end_time.isoformat(),
         'valorTotal': (station['station'].precoKwh * request.charge_time / 60),
-        'idPosto': idStation,
+        'idPosto': int(idStation),
         'cpf': user.cpf,
         'idCarro': request.id_carro
-    })
+    }
+    HistoryRepository.create(database, History(**history))
 
     user.wallet = updated_wallet
     return user
@@ -156,14 +161,16 @@ def deactivate_delete(
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="You're not autorized to access this charge")
 
     start_time = get_firestore_field(idStation, StationFields.charge_start_time)
+
+    start_time = datetime.isoformat(start_time)[:26]
     history = HistoryRepository.find_last_by_id_station(database, idStation, start_time)
-
-    history.horarioSaida = datetime.now()
-
-    HistoryRepository.update(history)
+    history.horarioSaida = datetime.now().isoformat()
+    database.commit()
 
     set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
     set_firestore_field(idStation, StationFields.charge_time, 0)
     set_firestore_field(idStation, StationFields.charge_start_time, '')
     set_firestore_field(idStation, StationFields.status, StationStatus.ONLINE)
     set_firestore_field(idStation, StationFields.user_cpf, '')
+
+    
