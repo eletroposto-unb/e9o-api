@@ -1,3 +1,4 @@
+import datetime
 from typing import List
 from sqlalchemy.orm import Session
 from lib.dao.models.history import History
@@ -49,3 +50,12 @@ class HistoryRepository:
             "history": histories
         }
         return res
+
+    @staticmethod
+    def find_last_by_id_station(database: Session, id_station: str, start_time: datetime.datetime):
+        response = database.query(History).filter(id_station == History.idPosto).filter(start_time == History.horarioEntrada).first()
+        return response
+    
+    def update(database: Session, history: History):
+        response = database.merge(history)
+        return response

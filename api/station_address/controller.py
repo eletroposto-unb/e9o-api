@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
 
-from lib.firestore.firestore import ChargeStatus, StationFields, StationStatus, set_firestore_field
+from lib.firestore.firestore import ChargeStatus, StationFields, StationStatus, get_firestore_field, set_firestore_field
 
 stations = APIRouter(
     prefix = '/stations',
@@ -151,6 +151,16 @@ def deactivate_delete(
     idStation: str,
     database: Session = Depends(get_database),
     user: object = Depends(tokenToUser)):
+
+    if user.cpf != get_firestore_field(idStation, StationFields.user_cpf) and not user.is_admin:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail="You're not autorized to access this charge")
+
+    start_time = get_firestore_field(idStation, StationFields.charge_start_time)
+    history = HistoryRepository.find_last_by_id_station(database, idStation, start_time)
+
+    history.horarioSaida = datetime.now()
+
+    HistoryRepository.update(history)
 
     set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
     set_firestore_field(idStation, StationFields.charge_time, 0)
