@@ -122,9 +122,14 @@ def activate_post(
     print(updated_wallet.qtdCreditos)
 
     '''Cria e salva um posto'''
-    set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
-    set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
-    set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
+    if ChargeStatus.CHARGING == 0:
+        set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
+        set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
+        set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Posto se encontra em uso"
+        )
     user.wallet = updated_wallet
     print(user.wallet)
     return user
