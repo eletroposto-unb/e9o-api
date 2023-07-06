@@ -111,18 +111,18 @@ def activate_post(
     user: object = Depends(tokenToUser)
     ):
     
-    wallet = WalletRepository.find_user_credits(user.cpf, database=database)
-    station = StationRepository.find_station_by_id(idStation, database=database)
-    wallet.qtdCreditos = wallet.qtdCreditos - (station['station'].precoKwh * request.charge_time / 60)
-    if wallet.qtdCreditos < 0 :
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Creditos Insuficientes"
-        )
-    updated_wallet = WalletRepository.update(wallet,database=database)
-    print(updated_wallet.qtdCreditos)
-
-    '''Cria e salva um posto'''
     if ChargeStatus.CHARGING == 0:
+        wallet = WalletRepository.find_user_credits(user.cpf, database=database)
+        station = StationRepository.find_station_by_id(idStation, database=database)
+        wallet.qtdCreditos = wallet.qtdCreditos - (station['station'].precoKwh * request.charge_time / 60)
+        if wallet.qtdCreditos < 0 :
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Creditos Insuficientes"
+            )
+        updated_wallet = WalletRepository.update(wallet,database=database)
+        print(updated_wallet.qtdCreditos)
+
+        '''Cria e salva um posto'''
         set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
         set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
         set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
