@@ -42,3 +42,6 @@ archive.zip
 
 # Firestore secret
 firestore_key.json
+
+# firebase 
+firebase.json

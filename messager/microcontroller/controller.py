@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from fastapi import APIRouter, status
 
-from lib.firestore.firestore import ChargeStatus, check_temperature, get_firestore_field, set_firestore_field, StationFields
+from lib.firestore.firestore import ChargeStatus, StationStatus, check_temperature, get_firestore_field, set_firestore_field, StationFields
 
 
 microcontroller  = APIRouter(
@@ -22,17 +22,26 @@ def return_charge_status(idStation: str):
         When this method returns 1, then the charge must be running
         If returns 0, then the charge must be stoepped.
     '''
-    charge_start_time = get_firestore_field(idStation, StationFields.charge_start_time)
-    charge_time = get_firestore_field(idStation, StationFields.charge_time)
-
-    now = datetime.now()
-    charge_end_time = charge_start_time + timedelta(minutes=charge_time)
-    charge_end_time = datetime.isoformat(charge_end_time)
-    charge_end_time = charge_end_time[:26]
-    charge_end_time = datetime.fromisoformat(charge_end_time)
-    if now > charge_end_time:
-        set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
     charge_status = get_firestore_field(idStation, StationFields.charge)
+
+    if charge_status == 1:
+        charge_start_time = get_firestore_field(idStation, StationFields.charge_start_time)
+        charge_time = get_firestore_field(idStation, StationFields.charge_time)
+
+        now = datetime.now()
+        charge_end_time = charge_start_time + timedelta(minutes=charge_time)
+        charge_end_time = datetime.isoformat(charge_end_time)
+        charge_end_time = charge_end_time[:26]
+        charge_end_time = datetime.fromisoformat(charge_end_time)
+        if now > charge_end_time:
+            charge_status = 0
+    print(charge_status)
+    if charge_status == 0:
+        set_firestore_field(idStation, StationFields.status, StationStatus.ONLINE)
+        set_firestore_field(idStation, StationFields.charge, ChargeStatus.STOPPED)
+        set_firestore_field(idStation, StationFields.charge_start_time, '')
+        set_firestore_field(idStation, StationFields.charge_time, 0)
+
     return charge_status
 
 @microcontroller.post("/{idStation}/totem/temperature",

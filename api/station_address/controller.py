@@ -13,7 +13,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from lib.firestore.firestore import ChargeStatus, StationFields, set_firestore_field
+from lib.firestore.firestore import ChargeStatus, StationFields, StationStatus, set_firestore_field
 
 stations = APIRouter(
     prefix = '/stations',
@@ -125,6 +125,7 @@ def activate_post(
     set_firestore_field(idStation, StationFields.charge, ChargeStatus.CHARGING)
     set_firestore_field(idStation, StationFields.charge_time, request.charge_time)
     set_firestore_field(idStation, StationFields.charge_start_time, datetime.now())
+    set_firestore_field(idStation, StationFields.status, StationStatus.BUSY)
     user.wallet = updated_wallet
     print(user.wallet)
     return user
