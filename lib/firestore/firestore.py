@@ -28,6 +28,8 @@ class StationFields(str, Enum):
     charge_time = 'charge_time'
     charge_start_time = 'charge_start_time'
     status = 'status'
+    battery_potency = 'battery_potency'
+    inverter_potency = 'inverter_potency'
     user_cpf = 'user_cpf'
 
 def get_firestore_doc(idStation: str):
@@ -43,7 +45,10 @@ def get_firestore_field(idStation: str, field: float) -> str:
     '''
     doc_ref = stations_ref.document(idStation)
     doc = doc_ref.get()
-    return doc.to_dict()[field]
+    try:
+        return doc.to_dict()[field]
+    except:
+        return '0'
 
 def set_firestore_field(idStation: str, field: str, value: float) -> None:
     '''

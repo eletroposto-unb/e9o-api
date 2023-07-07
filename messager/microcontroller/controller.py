@@ -78,7 +78,12 @@ def save_battery_temperature(idStation: str, request: float):
 )
 def save_battery_voltage(idStation: str, request: float):
     '''Recieve the battery voltage in Volts'''
+    battery_current = float(get_firestore_field(idStation, StationFields.battery_current))
+    if not battery_current:
+        battery_current = 0.0
+    set_firestore_field(idStation, StationFields.battery_potency, request*battery_current)
     set_firestore_field(idStation, StationFields.battery_voltage, request)
+
     print(f"Battery voltage {request} V")
     return request
 
@@ -87,6 +92,11 @@ def save_battery_voltage(idStation: str, request: float):
 )
 def save_battery_current(idStation: str, request: float):
     '''Recieve battry current in Ampere'''
+    battery_voltage = float(get_firestore_field(idStation, StationFields.battery_voltage))
+    if not battery_voltage:
+        battery_voltage = 0.0
+    
+    set_firestore_field(idStation, StationFields.battery_potency, request*battery_voltage)
     set_firestore_field(idStation, StationFields.battery_current, request)
     print(f"Battery current {request} A")
     return request
@@ -96,6 +106,7 @@ def save_battery_current(idStation: str, request: float):
 )
 def save_inverter_voltage(idStation: str, request: float):
     '''Recieve the inverter voltage in Volts'''
+
     set_firestore_field(idStation, StationFields.inverter_voltage, request)
     print(f"Inverter voltage {request} V")
     return request
@@ -105,6 +116,8 @@ def save_inverter_voltage(idStation: str, request: float):
 )
 def save_inverter_current(idStation: str, request: float):
     '''Recieve the inverter current in Ampere'''
+    
+    set_firestore_field(idStation, StationFields.inverter_potency, request*0.11)
     set_firestore_field(idStation, StationFields.inverter_current, request)
     print(f"Inverter current {request} A")
     return request
