@@ -50,7 +50,6 @@ def return_charge_status(idStation: str):
 def save_totem_temperature(idStation: str, request: float):
     '''Recieve temperature of the station totem in Celsius'''
     set_firestore_field(idStation, StationFields.totem_temperature, request)
-    check_temperature(idStation, request)
     print(f"Totem temperature: {request} ºC")
     return request
 

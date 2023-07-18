@@ -24,7 +24,6 @@ messager.include_router(microcontroller)
 @messager.on_event("startup")
 async def startup():
     initialize_database()
-    set_firestore_field('1', 'charge', '1')
     
 
 @messager.get('/status')
